@@ -3,12 +3,12 @@ use std::f32::consts::PI;
 use bevy::prelude::*;
 
 use crate::wave_gui::{
-    button_system, listen_received_character_events, setup_wave_gui, WaveGuiInput,
+    button_system, listen_received_character_events, setup_wave_gui, WaveGuiInputs,
 };
 
 #[allow(dead_code)]
 pub fn add_wave_2d_system(app: &mut App) {
-    app.add_event::<WaveGuiInput>()
+    app.add_event::<WaveGuiInputs>()
         .add_systems(Startup, setup_wave_gui)
         .add_systems(
             Update,
@@ -83,12 +83,12 @@ fn vert_x_arrow_out(x: f32, y: f32, gizmos: &mut Gizmos, color: Color) {
 }
 
 fn listen_inputs_from_gui(
-    mut events: EventReader<WaveGuiInput>,
+    mut events: EventReader<WaveGuiInputs>,
     mut commands: Commands,
     query: Query<Entity, With<Amplitude>>,
 ) {
     for input in events.read() {
-        match process_amplitude_str(&input.text) {
+        match process_amplitude_str(&input.amplitude) {
             Ok(a) => {
                 for e in query.iter() {
                     commands.entity(e).despawn_recursive();

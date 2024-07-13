@@ -4,21 +4,21 @@ const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
 const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 
-/// text input confirmed via add button
+/// form inputs
 #[derive(Event, Default)]
-pub struct WaveGuiInput {
-    pub text: String,
+pub struct WaveGuiInputs {
+    pub amplitude: String,
 }
 
-/// marker component for text input
+/// marker component for amplitude text input
 /// needs to be public to add the component in main, maybe I restructure this later
 #[derive(Component, Default)]
-pub struct TextInput;
+pub struct AmplitudeInput;
 
 pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/FiraMono-Medium.ttf");
 
-    let mut root = commands.spawn(NodeBundle {
+    let root = commands.spawn(NodeBundle {
         style: Style {
             position_type: PositionType::Absolute,
             flex_direction: FlexDirection::Column,
@@ -32,6 +32,17 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..default()
     });
 
+    add_input_with_button(&font, root, "Amplitude", AmplitudeInput);
+}
+
+pub fn add_input_with_button<T>(
+    font: &Handle<Font>,
+    mut root: EntityCommands,
+    label: &str,
+    marker: T,
+) where
+    T: Component,
+{
     let label = TextBundle {
         style: Style {
             position_type: PositionType::Relative,
@@ -42,7 +53,7 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         },
         text: Text::from_section(
-            "Amplitude:".to_string(),
+            label.to_string(),
             TextStyle {
                 font: font.clone(),
                 font_size: 20.0,
@@ -80,14 +91,14 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 
     root.with_children(|parent| {
-        parent.spawn((TextInput, text_input));
+        parent.spawn((marker, text_input));
     });
 
-    add_add_button(root, &font);
+    add_add_button(root, &font, SetAmplitudeButton);
 }
 
 pub fn button_system(
-    mut my_events: EventWriter<WaveGuiInput>,
+    mut my_events: EventWriter<WaveGuiInputs>,
     mut interaction_query: Query<
         (
             &Interaction,
@@ -97,7 +108,7 @@ pub fn button_system(
         ),
         (Changed<Interaction>, With<Button>),
     >,
-    edit_text: Query<&mut Text, With<TextInput>>,
+    edit_text: Query<&mut Text, With<AmplitudeInput>>,
 ) {
     match interaction_query.get_single_mut() {
         Ok((interaction, mut color, mut border_color, _)) => match *interaction {
@@ -105,8 +116,8 @@ pub fn button_system(
                 println!("pressed add!");
                 match edit_text.get_single() {
                     Ok(text) => {
-                        my_events.send(WaveGuiInput {
-                            text: text.sections[0].value.clone(),
+                        my_events.send(WaveGuiInputs {
+                            amplitude: text.sections[0].value.clone(),
                         });
                     }
                     Err(err) => panic!("error: {}", err),
@@ -131,7 +142,7 @@ pub fn button_system(
 
 pub fn listen_received_character_events(
     mut events: EventReader<ReceivedCharacter>,
-    mut edit_text: Query<&mut Text, With<TextInput>>,
+    mut edit_text: Query<&mut Text, With<AmplitudeInput>>,
 ) {
     for event in events.read() {
         println!("received text: {:?}", event);
@@ -148,7 +159,10 @@ pub fn listen_received_character_events(
     }
 }
 
-fn add_add_button(mut gui_root: EntityCommands, font: &Handle<Font>) {
+fn add_add_button<T>(mut gui_root: EntityCommands, font: &Handle<Font>, marker: T)
+where
+    T: Component,
+{
     let button_node = NodeBundle {
         style: Style {
             width: Val::Px(100.0),
@@ -175,7 +189,7 @@ fn add_add_button(mut gui_root: EntityCommands, font: &Handle<Font>) {
     };
 
     let label = TextBundle::from_section(
-        "Add",
+        "Set",
         TextStyle {
             font: font.clone(),
             font_size: 40.0,
@@ -184,10 +198,13 @@ fn add_add_button(mut gui_root: EntityCommands, font: &Handle<Font>) {
     );
 
     gui_root.with_children(|parent| {
-        parent.spawn(button_node).with_children(|parent| {
+        parent.spawn((marker, button_node)).with_children(|parent| {
             parent.spawn(button).with_children(|parent| {
                 parent.spawn(label);
             });
         });
     });
 }
+
+#[derive(Component)]
+struct SetAmplitudeButton;
