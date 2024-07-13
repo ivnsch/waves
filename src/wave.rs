@@ -1,24 +1,16 @@
 use std::f32::consts::PI;
 
 use bevy::prelude::*;
+use bevy_simple_text_input::TextInputPlugin;
 
-use crate::wave_gui::{
-    button_system, listen_received_character_events, setup_wave_gui, WaveGuiInputs,
-};
+use crate::wave_gui::{setup_wave_gui, text_listener, WaveGuiInputs};
 
 #[allow(dead_code)]
 pub fn add_wave_2d_system(app: &mut App) {
     app.add_event::<WaveGuiInputs>()
+        .add_plugins(TextInputPlugin)
         .add_systems(Startup, setup_wave_gui)
-        .add_systems(
-            Update,
-            (
-                draw_wave,
-                listen_received_character_events,
-                button_system,
-                listen_inputs_from_gui,
-            ),
-        );
+        .add_systems(Update, (draw_wave, listen_inputs_from_gui, text_listener));
 }
 
 fn draw_wave(mut gizmos: Gizmos, time: Res<Time>, amplitude: Query<&Amplitude>) {
