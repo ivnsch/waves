@@ -3,14 +3,14 @@ use bevy_simple_text_input::{TextInputBundle, TextInputSubmitEvent};
 
 /// form inputs
 #[derive(Event, Default)]
-pub struct WaveGuiInputs {
+pub struct AmplitudeInput {
     pub amplitude: String,
 }
 
 /// marker component for amplitude text input
 /// needs to be public to add the component in main, maybe I restructure this later
 #[derive(Component, Default)]
-pub struct AmplitudeInput;
+pub struct AmplitudeInputMarker;
 
 pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/FiraMono-Medium.ttf");
@@ -103,11 +103,11 @@ where
 
 pub fn text_listener(
     mut events: EventReader<TextInputSubmitEvent>,
-    mut my_events: EventWriter<WaveGuiInputs>,
+    mut my_events: EventWriter<AmplitudeInput>,
 ) {
     for event in events.read() {
         info!("{:?} submitted: {}", event.entity, event.value);
-        my_events.send(WaveGuiInputs {
+        my_events.send(AmplitudeInput {
             amplitude: event.value.clone(),
         });
     }

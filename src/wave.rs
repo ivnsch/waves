@@ -3,11 +3,11 @@ use std::f32::consts::PI;
 use bevy::prelude::*;
 use bevy_simple_text_input::TextInputPlugin;
 
-use crate::wave_gui::{setup_wave_gui, text_listener, WaveGuiInputs};
+use crate::wave_gui::{setup_wave_gui, text_listener, AmplitudeInput};
 
 #[allow(dead_code)]
 pub fn add_wave_2d_system(app: &mut App) {
-    app.add_event::<WaveGuiInputs>()
+    app.add_event::<AmplitudeInput>()
         .add_plugins(TextInputPlugin)
         .add_systems(Startup, setup_wave_gui)
         .add_systems(Update, (draw_wave, listen_inputs_from_gui, text_listener));
@@ -75,7 +75,7 @@ fn vert_x_arrow_out(x: f32, y: f32, gizmos: &mut Gizmos, color: Color) {
 }
 
 fn listen_inputs_from_gui(
-    mut events: EventReader<WaveGuiInputs>,
+    mut events: EventReader<AmplitudeInput>,
     mut commands: Commands,
     query: Query<Entity, With<Amplitude>>,
 ) {
