@@ -1,4 +1,4 @@
-use bevy::{ecs::system::EntityCommands, prelude::*};
+use bevy::prelude::*;
 use bevy_simple_text_input::{TextInputBundle, TextInputSubmitEvent};
 
 #[derive(Resource)]
@@ -13,6 +13,12 @@ pub struct GuiInputsEvent {
     pub wave_length: String,
 }
 
+#[derive(Resource)]
+pub struct GuiInputEntities {
+    pub amplitude: Entity,
+    pub wave_length: Entity,
+}
+
 /// marker component for amplitude text input
 /// needs to be public to add the component in main, maybe I restructure this later
 #[derive(Component, Default)]
@@ -23,7 +29,7 @@ pub struct WaveLengthInputMarker;
 pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/FiraMono-Medium.ttf");
 
-    let mut root = commands.spawn(NodeBundle {
+    let root = commands.spawn(NodeBundle {
         style: Style {
             position_type: PositionType::Absolute,
             flex_direction: FlexDirection::Column,
@@ -37,15 +43,59 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..default()
     });
 
-    add_input(&font, &mut root, "Amplitude", AmplitudeInputMarker);
-    add_input(&font, &mut root, "Wave length", WaveLengthInputMarker);
+    let root_id = root.id();
+
+    let amplitude_input = generate_input(
+        &font,
+        root_id,
+        &mut commands,
+        "Amplitude",
+        AmplitudeInputMarker,
+    );
+    let wave_length_input = generate_input(
+        &font,
+        root_id,
+        &mut commands,
+        "Wave length",
+        WaveLengthInputMarker,
+    );
+
+    commands.insert_resource(GuiInputEntities {
+        amplitude: amplitude_input,
+        wave_length: wave_length_input,
+    });
 }
 
-pub fn add_input<T>(font: &Handle<Font>, root: &mut EntityCommands, label: &str, marker: T)
+fn generate_input<T>(
+    font: &Handle<Font>,
+    root_id: Entity,
+    commands: &mut Commands,
+    label: &str,
+    marker: T,
+) -> Entity
 where
     T: Component,
 {
-    let label = TextBundle {
+    let label = generate_input_label(font, label);
+    let wrapper = generate_wrapper();
+    let text_input_bundle = generate_text_input();
+
+    let spawned_label = commands.spawn(label).id();
+    commands.entity(root_id).push_children(&[spawned_label]);
+
+    let spawned_wrapper = commands.spawn(wrapper).id();
+    commands.entity(root_id).push_children(&[spawned_wrapper]);
+
+    let spawned_text_input_bundle = commands.spawn((marker, text_input_bundle)).id();
+    commands
+        .entity(root_id)
+        .push_children(&[spawned_text_input_bundle]);
+
+    spawned_text_input_bundle
+}
+
+fn generate_input_label(font: &Handle<Font>, label: &str) -> TextBundle {
+    TextBundle {
         style: Style {
             position_type: PositionType::Relative,
             top: Val::Px(0.0),
@@ -64,9 +114,11 @@ where
             },
         ),
         ..default()
-    };
+    }
+}
 
-    let wrapper = NodeBundle {
+fn generate_wrapper() -> NodeBundle {
+    NodeBundle {
         style: Style {
             position_type: PositionType::Relative,
             top: Val::Px(0.0),
@@ -78,9 +130,17 @@ where
         },
         // background_color: BackgroundColor(Color::GRAY),
         ..default()
+    }
+}
+
+fn generate_text_input() -> (NodeBundle, TextInputBundle) {
+    let input = TextStyle {
+        font_size: 40.,
+        color: Color::WHITE,
+        ..default()
     };
 
-    let text_input_bundle = (
+    (
         NodeBundle {
             style: Style {
                 width: Val::Px(200.0),
@@ -92,39 +152,24 @@ where
             background_color: Color::GRAY.into(),
             ..default()
         },
-        TextInputBundle::default().with_text_style(TextStyle {
-            font_size: 40.,
-            color: Color::WHITE,
-            ..default()
-        }),
-    );
-
-    root.with_children(|parent| {
-        parent.spawn(label);
-    });
-
-    root.with_children(|parent| {
-        parent.spawn(wrapper).with_children(|parent| {
-            parent.spawn((marker, text_input_bundle));
-        });
-    });
+        TextInputBundle::default().with_text_style(input),
+    )
 }
 
-pub fn text_listener(mut events: EventReader<TextInputSubmitEvent>, mut inputs: ResMut<GuiInputs>) {
+pub fn text_listener(
+    mut events: EventReader<TextInputSubmitEvent>,
+    mut inputs: ResMut<GuiInputs>,
+    input_entities: Res<GuiInputEntities>,
+) {
     for event in events.read() {
-        let index = event.entity.index();
-        match index {
-            5 => {
-                info!("{:?} submitted amplitude: {}", index, event.value);
-                inputs.amplitude = event.value.clone();
-            }
-            8 => {
-                info!("{:?} submitted wave length: {}", index, event.value);
-                inputs.wave_length = event.value.clone();
-            }
-            _ => {
-                println!("unknown index: {}", index);
-            }
+        if event.entity == input_entities.amplitude {
+            info!("submitted amplitude: {}", event.value);
+            inputs.amplitude = event.value.clone();
+        } else if event.entity == input_entities.wave_length {
+            println!("submitted wave length: {:?}", event.entity);
+            inputs.wave_length = event.value.clone();
+        } else {
+            println!("unknown entity: {:?}", event.entity);
         }
     }
 }
