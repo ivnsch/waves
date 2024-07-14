@@ -15,6 +15,7 @@ mod wave_gui;
 use bevy::app::App;
 #[allow(unused_imports)]
 use curves_3d::add_curves_3d_system;
+#[allow(unused_imports)]
 use grid_2d::add_grid_2d_system;
 #[allow(unused_imports)]
 use scratchpad_3d::add_3d_scratch;
@@ -36,7 +37,7 @@ fn main() {
 #[allow(dead_code)]
 fn create_2d(app: &mut App) {
     add_2d_space(app);
-    add_grid_2d_system(app);
+    // add_grid_2d_system(app);
     // grid completely hiding axes so draw axes on top.
     add_2d_axes(app);
     // add_curves_2d_system(app);
