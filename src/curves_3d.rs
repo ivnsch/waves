@@ -1,17 +1,11 @@
-use std::f32::consts::PI;
-
-use bevy::{
-    color::palettes::css::{GREEN, WHITE},
-    prelude::*,
-};
+use bevy::{color::palettes::css::WHITE, prelude::*};
 
 use crate::functions::draw_line_fn;
 
 #[allow(dead_code)]
 pub fn add_curves_3d_system(app: &mut App) {
-    // app.add_systems(Update, draw_square_fn);
+    app.add_systems(Update, draw_square_fn);
     // app.add_systems(Update, draw_sin_as_vert_vecs);
-    app.add_systems(Update, draw_electromagnetic_wave);
 }
 
 #[allow(dead_code)]
@@ -36,35 +30,9 @@ fn draw_sin_as_vert_vecs(mut gizmos: Gizmos, _time: Res<Time>) {
     // draw_fn(gizmos, -10 + t as i32, 10 + t as i32, |x| x.sin());
 }
 
-fn draw_electromagnetic_wave(mut gizmos: Gizmos, time: Res<Time>) {
-    let range = 20;
-
-    let t = time.elapsed_seconds();
-    // let t = 0.0; // not animated
-
-    let function = |x: f32| {
-        // for now not a vector. to draw the electric vs magnetic wave we just change parallel_z parameter
-        let amplitude = 1.0;
-        let wave_length = 3.0;
-        let k = 2.0 * PI / wave_length;
-        let frequency = 0.5;
-        let angular_frequency = 2.0 * PI * frequency;
-        let phase = 0.0;
-        let scalar = ((k * x) - angular_frequency * t + phase).cos();
-        // if (x % 20.0).abs() < 0.01 && x > 20.0 {
-        // println!("t: {}, res: {}, x: {}", t, amplitude * scalar, x);
-        // }
-
-        amplitude * scalar
-    };
-
-    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, true, WHITE, function);
-    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, false, GREEN, function);
-}
-
 /// draws planar function as a sequence of vectors,
 /// planar here meaning specifically on xz plane (parallel_z == true) or xy plane (parallel_z == false)
-fn draw_planar_fn_as_vert_vecs<F>(
+pub fn draw_planar_fn_as_vert_vecs<F>(
     gizmos: &mut Gizmos,
     range_start: i32,
     range_end: i32,
