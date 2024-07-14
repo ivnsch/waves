@@ -65,42 +65,42 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     let root_id = root.id();
 
-    let amplitude_input = generate_input(
+    let amplitude_input = generate_input_box(
         &font,
         root_id,
         &mut commands,
         "Amplitude",
         AmplitudeInputMarker,
     );
-    let wave_length_input = generate_input(
+    let wave_length_input = generate_input_box(
         &font,
         root_id,
         &mut commands,
         "Wave length",
         WaveLengthInputMarker,
     );
-    let frequency_input = generate_input(
+    let frequency_input = generate_input_box(
         &font,
         root_id,
         &mut commands,
         "Frequency",
         FrequencyInputMarker,
     );
-    let k_coefficient_input = generate_input(
+    let k_coefficient_input = generate_input_box(
         &font,
         root_id,
         &mut commands,
         "K coefficient",
         KCoefficientMarker,
     );
-    let angular_frequency_coefficient_input = generate_input(
+    let angular_frequency_coefficient_input = generate_input_box(
         &font,
         root_id,
         &mut commands,
         "Angular frequency coefficient",
         AngularCoefficientMarker,
     );
-    let phase_input = generate_input(&font, root_id, &mut commands, "Phase", PhaseMarker);
+    let phase_input = generate_input_box(&font, root_id, &mut commands, "Phase", PhaseMarker);
 
     commands.insert_resource(GuiInputEntities {
         amplitude: amplitude_input,
@@ -112,7 +112,7 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-fn generate_input<T>(
+fn generate_input_box<T>(
     font: &Handle<Font>,
     root_id: Entity,
     commands: &mut Commands,
@@ -123,8 +123,8 @@ where
     T: Component,
 {
     let label = generate_input_label(font, label);
-    let wrapper = generate_wrapper();
-    let text_input_bundle = generate_text_input();
+    let wrapper = generate_input_wrapper();
+    let text_input_bundle = generate_input();
 
     let spawned_label = commands.spawn(label).id();
     commands.entity(root_id).push_children(&[spawned_label]);
@@ -163,7 +163,7 @@ fn generate_input_label(font: &Handle<Font>, label: &str) -> TextBundle {
     }
 }
 
-fn generate_wrapper() -> NodeBundle {
+fn generate_input_wrapper() -> NodeBundle {
     NodeBundle {
         style: Style {
             position_type: PositionType::Relative,
@@ -178,7 +178,7 @@ fn generate_wrapper() -> NodeBundle {
     }
 }
 
-fn generate_text_input() -> (NodeBundle, TextInputBundle) {
+fn generate_input() -> (NodeBundle, TextInputBundle) {
     let input = TextStyle {
         font_size: 40.,
         color: Color::WHITE,
