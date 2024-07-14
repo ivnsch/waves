@@ -5,18 +5,21 @@ use bevy_simple_text_input::{TextInputBundle, TextInputSubmitEvent};
 pub struct GuiInputs {
     pub amplitude: String,
     pub wave_length: String,
+    pub frequency: String,
 }
 
 #[derive(Event, Default, Debug)]
 pub struct GuiInputsEvent {
     pub amplitude: String,
     pub wave_length: String,
+    pub frequency: String,
 }
 
 #[derive(Resource)]
 pub struct GuiInputEntities {
     pub amplitude: Entity,
     pub wave_length: Entity,
+    pub frequency: Entity,
 }
 
 /// marker component for amplitude text input
@@ -25,6 +28,8 @@ pub struct GuiInputEntities {
 pub struct AmplitudeInputMarker;
 #[derive(Component, Default)]
 pub struct WaveLengthInputMarker;
+#[derive(Component, Default)]
+pub struct FrequencyInputMarker;
 
 pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/FiraMono-Medium.ttf");
@@ -59,10 +64,18 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
         "Wave length",
         WaveLengthInputMarker,
     );
+    let frequency_input = generate_input(
+        &font,
+        root_id,
+        &mut commands,
+        "Frequency",
+        FrequencyInputMarker,
+    );
 
     commands.insert_resource(GuiInputEntities {
         amplitude: amplitude_input,
         wave_length: wave_length_input,
+        frequency: frequency_input,
     });
 }
 
@@ -168,6 +181,9 @@ pub fn text_listener(
         } else if event.entity == input_entities.wave_length {
             println!("submitted wave length: {:?}", event.entity);
             inputs.wave_length = event.value.clone();
+        } else if event.entity == input_entities.frequency {
+            println!("submitted frequency: {:?}", event.entity);
+            inputs.frequency = event.value.clone();
         } else {
             println!("unknown entity: {:?}", event.entity);
         }
@@ -178,12 +194,9 @@ pub fn form_state_notifier_system(
     form_state: Res<GuiInputs>,
     mut my_events: EventWriter<GuiInputsEvent>,
 ) {
-    // println!(
-    //     "amplitude: {}, wave length: {}",
-    //     form_state.amplitude, form_state.wave_length
-    // );
     my_events.send(GuiInputsEvent {
         amplitude: form_state.amplitude.clone(),
         wave_length: form_state.wave_length.clone(),
+        frequency: form_state.frequency.clone(),
     });
 }

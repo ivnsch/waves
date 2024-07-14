@@ -14,6 +14,7 @@ pub fn add_wave_2d_system(app: &mut App) {
         .insert_resource(GuiInputs {
             amplitude: "1".to_owned(),
             wave_length: "2".to_owned(),
+            frequency: "0.5".to_owned(),
         })
         .add_systems(Startup, setup_wave_gui)
         .add_systems(
@@ -33,8 +34,9 @@ fn draw_wave(
     time: Res<Time>,
     amplitude: Query<&Amplitude>,
     wave_length: Query<&WaveLength>,
+    frequency: Query<&Frequency>,
 ) {
-    match draw_wave_internal(gizmos, time, amplitude, wave_length) {
+    match draw_wave_internal(gizmos, time, amplitude, wave_length, frequency) {
         Ok(_) => {}
         Err(e) => match e {
             QuerySingleError::NoEntities(s) => {
@@ -54,9 +56,11 @@ fn draw_wave_internal(
     time: Res<Time>,
     amplitude: Query<&Amplitude>,
     wave_length: Query<&WaveLength>,
+    frequency: Query<&Frequency>,
 ) -> Result<(), QuerySingleError> {
     let amplitude = amplitude.get_single()?;
     let wave_length = wave_length.get_single()?;
+    let frequency = frequency.get_single()?;
 
     let range = 20;
 
@@ -70,8 +74,7 @@ fn draw_wave_internal(
         // let wave_length = 3.0;
         let k = 2.0 * PI / wave_length.0; // wave cycles per unit distance
                                           // let k = 2.0 * PI / wave_length.0; // wave cycles per unit distance
-        let frequency = 0.5;
-        let angular_frequency = 2.0 * PI * frequency;
+        let angular_frequency = 2.0 * PI * frequency.0;
         let phase = 0.0;
         let scalar = ((k * x) - angular_frequency * t + phase).cos();
 
@@ -124,6 +127,7 @@ fn listen_gui_inputs(
     mut commands: Commands,
     amplitude_query: Query<Entity, With<Amplitude>>,
     wave_length_query: Query<Entity, With<WaveLength>>,
+    frequency_query: Query<Entity, With<Frequency>>,
 ) {
     for input in events.read() {
         // println!("got events in wave.rs: {:?}", input);
@@ -138,6 +142,13 @@ fn listen_gui_inputs(
             Ok(f) => {
                 despawn_all_entities(&mut commands, &wave_length_query);
                 commands.spawn(WaveLength(f));
+            }
+            Err(err) => println!("error: {}", err),
+        }
+        match parse_float(&input.frequency) {
+            Ok(f) => {
+                despawn_all_entities(&mut commands, &frequency_query);
+                commands.spawn(Frequency(f));
             }
             Err(err) => println!("error: {}", err),
         }
@@ -185,3 +196,6 @@ struct Amplitude(f32);
 
 #[derive(Component, Debug)]
 struct WaveLength(f32);
+
+#[derive(Component, Debug)]
+struct Frequency(f32);
