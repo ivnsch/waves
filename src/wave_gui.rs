@@ -171,7 +171,10 @@ fn generate_input_wrapper() -> NodeBundle {
             left: Val::Px(0.0),
             width: Val::Percent(100.0),
             height: Val::Px(50.0),
-
+            margin: UiRect {
+                bottom: Val::Px(20.0),
+                ..default()
+            },
             ..default()
         },
         ..default()
