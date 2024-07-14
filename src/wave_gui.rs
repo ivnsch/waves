@@ -1,6 +1,6 @@
 use bevy::{color::palettes::css::GRAY, prelude::*};
 use bevy_simple_text_input::{
-    TextInputBundle, TextInputInactive, TextInputSettings, TextInputSubmitEvent,
+    TextInputBundle, TextInputInactive, TextInputSettings, TextInputSubmitEvent, TextInputValue,
 };
 
 #[derive(Resource)]
@@ -48,7 +48,11 @@ pub struct AngularCoefficientMarker;
 #[derive(Component, Default)]
 pub struct PhaseMarker;
 
-pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup_wave_gui(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    form_state: Res<GuiInputs>,
+) {
     let font = asset_server.load("fonts/FiraMono-Medium.ttf");
 
     let root = commands.spawn(NodeBundle {
@@ -73,6 +77,7 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
         &mut commands,
         "Amplitude",
         AmplitudeInputMarker,
+        form_state.amplitude.clone(),
     );
     let wave_length_input = generate_input_box(
         &font,
@@ -80,6 +85,7 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
         &mut commands,
         "Wave length",
         WaveLengthInputMarker,
+        form_state.wave_length.clone(),
     );
     let frequency_input = generate_input_box(
         &font,
@@ -87,6 +93,7 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
         &mut commands,
         "Frequency",
         FrequencyInputMarker,
+        form_state.frequency.clone(),
     );
     let k_coefficient_input = generate_input_box(
         &font,
@@ -94,6 +101,7 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
         &mut commands,
         "K coefficient",
         KCoefficientMarker,
+        form_state.k_coefficient.clone(),
     );
     let angular_frequency_coefficient_input = generate_input_box(
         &font,
@@ -101,8 +109,16 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
         &mut commands,
         "Angular frequency coefficient",
         AngularCoefficientMarker,
+        form_state.angular_frequency_coefficient.clone(),
     );
-    let phase_input = generate_input_box(&font, root_id, &mut commands, "Phase", PhaseMarker);
+    let phase_input = generate_input_box(
+        &font,
+        root_id,
+        &mut commands,
+        "Phase",
+        PhaseMarker,
+        form_state.phase.clone(),
+    );
 
     commands.insert_resource(GuiInputEntities {
         amplitude: amplitude_input,
@@ -120,13 +136,14 @@ fn generate_input_box<T>(
     commands: &mut Commands,
     label: &str,
     marker: T,
+    value: String,
 ) -> Entity
 where
     T: Component,
 {
     let label = generate_input_label(font, label);
     let wrapper = generate_input_wrapper();
-    let text_input_bundle = generate_input();
+    let text_input_bundle = generate_input(value);
 
     let spawned_label = commands.spawn(label).id();
     commands.entity(root_id).push_children(&[spawned_label]);
@@ -182,7 +199,7 @@ fn generate_input_wrapper() -> NodeBundle {
     }
 }
 
-fn generate_input() -> (NodeBundle, TextInputBundle) {
+fn generate_input(value: String) -> (NodeBundle, TextInputBundle) {
     let input = TextStyle {
         font_size: 14.,
         color: Color::WHITE,
@@ -207,6 +224,7 @@ fn generate_input() -> (NodeBundle, TextInputBundle) {
                 ..default()
             },
             inactive: TextInputInactive(true),
+            value: TextInputValue(value),
             ..default()
         }
         .with_text_style(input),
