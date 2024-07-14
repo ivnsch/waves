@@ -27,6 +27,7 @@ fn add_info_labels(mut commands: Commands, font: &Handle<Font>) {
         120.0,
     ));
 }
+
 fn generate_info_label(font: &Handle<Font>, label: &str, top: f32) -> TextBundle {
     TextBundle {
         style: Style {
