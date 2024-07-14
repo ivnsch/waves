@@ -72,5 +72,5 @@ pub fn draw_planar_fn_as_vert_vecs<F>(
 }
 
 fn vert_x_arrow_out(x: f32, y: f32, z: f32, gizmos: &mut Gizmos, color: Srgba) {
-    gizmos.arrow(Vec3::new(x, 0.0, 0.0), Vec3::new(x, y, z), color);
+    gizmos.line(Vec3::new(x, 0.0, 0.0), Vec3::new(x, y, z), color);
 }
