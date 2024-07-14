@@ -17,6 +17,7 @@ pub fn add_wave_2d_system(app: &mut App) {
             frequency: "0.5".to_owned(),
             k_coeffient: "2".to_owned(),
             angular_frequency_coeffient: "2".to_owned(),
+            phase: "0".to_owned(),
         })
         .add_systems(Startup, setup_wave_gui)
         .add_systems(
@@ -39,6 +40,7 @@ fn draw_wave(
     frequency: Query<&Frequency>,
     k_coefficient: Query<&KCoefficient>,
     angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
+    phase: Query<&Phase>,
 ) {
     match draw_wave_internal(
         gizmos,
@@ -48,6 +50,7 @@ fn draw_wave(
         frequency,
         k_coefficient,
         angular_frequency_coefficient,
+        phase,
     ) {
         Ok(_) => {}
         Err(e) => match e {
@@ -71,12 +74,14 @@ fn draw_wave_internal(
     frequency: Query<&Frequency>,
     k_coefficient: Query<&KCoefficient>,
     angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
+    phase: Query<&Phase>,
 ) -> Result<(), QuerySingleError> {
     let amplitude = amplitude.get_single()?;
     let wave_length = wave_length.get_single()?;
     let frequency = frequency.get_single()?;
     let k_coefficient = k_coefficient.get_single()?;
     let angular_frequency_coefficient = angular_frequency_coefficient.get_single()?;
+    let phase = phase.get_single()?;
 
     let range = 20;
 
@@ -91,8 +96,7 @@ fn draw_wave_internal(
         let k = k_coefficient.0 * PI / wave_length.0; // wave cycles per unit distance
                                                       // let k = 2.0 * PI / wave_length.0; // wave cycles per unit distance
         let angular_frequency = angular_frequency_coefficient.0 * PI * frequency.0;
-        let phase = 0.0;
-        let scalar = ((k * x) - angular_frequency * t + phase).cos();
+        let scalar = ((k * x) - angular_frequency * t + phase.0).cos();
 
         amplitude.0 * scalar
     };
@@ -146,6 +150,7 @@ fn listen_gui_inputs(
     frequency_query: Query<Entity, With<Frequency>>,
     k_coefficient_query: Query<Entity, With<KCoefficient>>,
     angular_frequency_coefficient_query: Query<Entity, With<AngularFrequencyCoefficient>>,
+    phase_query: Query<Entity, With<Phase>>,
 ) {
     for input in events.read() {
         // println!("got events in wave.rs: {:?}", input);
@@ -181,6 +186,13 @@ fn listen_gui_inputs(
             Ok(f) => {
                 despawn_all_entities(&mut commands, &angular_frequency_coefficient_query);
                 commands.spawn(AngularFrequencyCoefficient(f));
+            }
+            Err(err) => println!("error: {}", err),
+        }
+        match parse_float(&input.phase) {
+            Ok(f) => {
+                despawn_all_entities(&mut commands, &phase_query);
+                commands.spawn(Phase(f));
             }
             Err(err) => println!("error: {}", err),
         }
@@ -237,3 +249,6 @@ struct KCoefficient(f32);
 
 #[derive(Component, Debug)]
 struct AngularFrequencyCoefficient(f32);
+
+#[derive(Component, Debug)]
+struct Phase(f32);
