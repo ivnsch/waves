@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use bevy::prelude::*;
+use bevy::{ecs::query::QuerySingleError, prelude::*};
 use bevy_simple_text_input::{TextInputInactive, TextInputPlugin};
 
 use crate::wave_gui::{
@@ -29,36 +29,58 @@ pub fn add_wave_2d_system(app: &mut App) {
 }
 
 fn draw_wave(
-    mut gizmos: Gizmos,
+    gizmos: Gizmos,
     time: Res<Time>,
     amplitude: Query<&Amplitude>,
     wave_length: Query<&WaveLength>,
 ) {
-    for amplitude in amplitude.iter() {
-        for wave_length in wave_length.iter() {
-            let range = 20;
-
-            let t = time.elapsed_seconds() as f32;
-            // let t = 0.0; // not animated
-
-            // equation of travelling wave: u(x,t)=Acos(kx−ωt)
-            // nice explanation https://physics.stackexchange.com/a/259007
-            let function = |x: f32| {
-                // let amplitude = 1.0;
-                // let wave_length = 3.0;
-                let k = 2.0 * PI / wave_length.0; // wave cycles per unit distance
-                                                  // let k = 2.0 * PI / wave_length.0; // wave cycles per unit distance
-                let frequency = 0.5;
-                let angular_frequency = 2.0 * PI * frequency;
-                let phase = 0.0;
-                let scalar = ((k * x) - angular_frequency * t + phase).cos();
-
-                amplitude.0 * scalar
-            };
-
-            draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, Color::WHITE, function);
-        }
+    match draw_wave_internal(gizmos, time, amplitude, wave_length) {
+        Ok(_) => {}
+        Err(e) => match e {
+            QuerySingleError::NoEntities(s) => {
+                // this is logged 2x at the beginning (even if we set defaults in insert_resource). doesn't seem to be an issue.
+                // after that it shouldn't appear again, because each field should always have a value.
+                info!("No entity added yet: {}", s)
+            }
+            QuerySingleError::MultipleEntities(s) => {
+                error!("Found multiple entities of a type: {}", s)
+            }
+        },
     }
+}
+
+fn draw_wave_internal(
+    mut gizmos: Gizmos,
+    time: Res<Time>,
+    amplitude: Query<&Amplitude>,
+    wave_length: Query<&WaveLength>,
+) -> Result<(), QuerySingleError> {
+    let amplitude = amplitude.get_single()?;
+    let wave_length = wave_length.get_single()?;
+
+    let range = 20;
+
+    let t = time.elapsed_seconds() as f32;
+    // let t = 0.0; // not animated
+
+    // equation of travelling wave: u(x,t)=Acos(kx−ωt)
+    // nice explanation https://physics.stackexchange.com/a/259007
+    let function = |x: f32| {
+        // let amplitude = 1.0;
+        // let wave_length = 3.0;
+        let k = 2.0 * PI / wave_length.0; // wave cycles per unit distance
+                                          // let k = 2.0 * PI / wave_length.0; // wave cycles per unit distance
+        let frequency = 0.5;
+        let angular_frequency = 2.0 * PI * frequency;
+        let phase = 0.0;
+        let scalar = ((k * x) - angular_frequency * t + phase).cos();
+
+        amplitude.0 * scalar
+    };
+
+    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, Color::WHITE, function);
+
+    Ok(())
 }
 
 /// draws planar function as a sequence of vectors,
