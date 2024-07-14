@@ -158,7 +158,6 @@ fn generate_input_label(font: &Handle<Font>, label: &str) -> TextBundle {
                 font: font.clone(),
                 font_size: 14.0,
                 color: Color::WHITE,
-                ..default()
             },
         ),
         ..default()

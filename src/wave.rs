@@ -36,6 +36,7 @@ pub fn add_wave_2d_system(app: &mut App) {
         );
 }
 
+#[allow(clippy::too_many_arguments)]
 fn draw_wave(
     gizmos: Gizmos,
     time: Res<Time>,
@@ -70,6 +71,7 @@ fn draw_wave(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn draw_wave_internal(
     mut gizmos: Gizmos,
     time: Res<Time>,
@@ -89,7 +91,7 @@ fn draw_wave_internal(
 
     let range = 20;
 
-    let t = time.elapsed_seconds() as f32;
+    let t = time.elapsed_seconds();
     // let t = 0.0; // not animated
 
     // equation of travelling wave: u(x,t)=Acos(kx−ωt)
@@ -125,7 +127,7 @@ fn draw_planar_fn_as_vert_vecs<F>(
 
     let mut value = range_start as f32;
     while value < range_end as f32 {
-        let x = value as f32;
+        let x = value;
         let y = function(x);
 
         if let Some((last_x, last_y)) = last_point {
@@ -143,6 +145,7 @@ fn vert_x_arrow_out(x: f32, y: f32, gizmos: &mut Gizmos, color: Color) {
 }
 
 // TODO error handling (show on ui)
+#[allow(clippy::too_many_arguments)]
 fn listen_gui_inputs(
     mut events: EventReader<GuiInputsEvent>,
     mut commands: Commands,

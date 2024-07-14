@@ -39,7 +39,7 @@ fn draw_sin_as_vert_vecs(mut gizmos: Gizmos, _time: Res<Time>) {
 fn draw_electromagnetic_wave(mut gizmos: Gizmos, time: Res<Time>) {
     let range = 20;
 
-    let t = time.elapsed_seconds() as f32;
+    let t = time.elapsed_seconds();
     // let t = 0.0; // not animated
 
     let function = |x: f32| {
@@ -82,7 +82,7 @@ fn draw_planar_fn_as_vert_vecs<F>(
 
     let mut value = range_start as f32;
     while value < range_end as f32 {
-        let x = value as f32;
+        let x = value;
         let z = function(x);
         let y = 0.0;
         let (z, y) = if parallel_z { (z, y) } else { (y, z) };
