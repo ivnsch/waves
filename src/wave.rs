@@ -5,7 +5,7 @@ use bevy::{
     ecs::query::QuerySingleError,
     prelude::*,
 };
-use bevy_simple_text_input::{TextInputInactive, TextInputPlugin};
+use bevy_simple_text_input::{TextInputInactive, TextInputPlugin, TextInputSystem};
 
 use crate::wave_gui::{
     form_state_notifier_system, setup_wave_gui, text_listener, GuiInputs, GuiInputsEvent,
@@ -24,13 +24,13 @@ pub fn add_wave_2d_system(app: &mut App) {
             phase: "0".to_owned(),
         })
         .add_systems(Startup, setup_wave_gui)
+        .add_systems(Update, focus.before(TextInputSystem))
         .add_systems(
             Update,
             (
                 draw_wave,
                 listen_gui_inputs,
                 text_listener,
-                focus,
                 form_state_notifier_system,
             ),
         );
