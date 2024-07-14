@@ -57,7 +57,7 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
             flex_direction: FlexDirection::Column,
             top: Val::Px(0.0),
             right: Val::Px(0.0),
-            width: Val::Px(300.0),
+            width: Val::Px(100.0),
             height: Val::Percent(100.0),
             ..default()
         },
@@ -156,7 +156,7 @@ fn generate_input_label(font: &Handle<Font>, label: &str) -> TextBundle {
             label.to_string(),
             TextStyle {
                 font: font.clone(),
-                font_size: 20.0,
+                font_size: 14.0,
                 color: Color::WHITE,
                 ..default()
             },
@@ -172,7 +172,7 @@ fn generate_input_wrapper() -> NodeBundle {
             top: Val::Px(0.0),
             left: Val::Px(0.0),
             width: Val::Percent(100.0),
-            height: Val::Px(50.0),
+            height: Val::Px(30.0),
             margin: UiRect {
                 bottom: Val::Px(20.0),
                 ..default()
@@ -185,7 +185,7 @@ fn generate_input_wrapper() -> NodeBundle {
 
 fn generate_input() -> (NodeBundle, TextInputBundle) {
     let input = TextStyle {
-        font_size: 40.,
+        font_size: 14.,
         color: Color::WHITE,
         ..default()
     };
