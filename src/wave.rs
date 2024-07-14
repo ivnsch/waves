@@ -15,8 +15,8 @@ pub fn add_wave_2d_system(app: &mut App) {
             amplitude: "1".to_owned(),
             wave_length: "2".to_owned(),
             frequency: "0.5".to_owned(),
-            k_coeffient: "2".to_owned(),
-            angular_frequency_coeffient: "2".to_owned(),
+            k_coefficient: "2".to_owned(),
+            angular_frequency_coefficient: "2".to_owned(),
             phase: "0".to_owned(),
         })
         .add_systems(Startup, setup_wave_gui)
@@ -91,10 +91,7 @@ fn draw_wave_internal(
     // equation of travelling wave: u(x,t)=Acos(kx−ωt)
     // nice explanation https://physics.stackexchange.com/a/259007
     let function = |x: f32| {
-        // let amplitude = 1.0;
-        // let wave_length = 3.0;
         let k = k_coefficient.0 * PI / wave_length.0; // wave cycles per unit distance
-                                                      // let k = 2.0 * PI / wave_length.0; // wave cycles per unit distance
         let angular_frequency = angular_frequency_coefficient.0 * PI * frequency.0;
         let scalar = ((k * x) - angular_frequency * t + phase.0).cos();
 
@@ -175,14 +172,14 @@ fn listen_gui_inputs(
             }
             Err(err) => println!("error: {}", err),
         }
-        match parse_float(&input.k_coeffient) {
+        match parse_float(&input.k_coefficient) {
             Ok(f) => {
                 despawn_all_entities(&mut commands, &k_coefficient_query);
                 commands.spawn(KCoefficient(f));
             }
             Err(err) => println!("error: {}", err),
         }
-        match parse_float(&input.angular_frequency_coeffient) {
+        match parse_float(&input.angular_frequency_coefficient) {
             Ok(f) => {
                 despawn_all_entities(&mut commands, &angular_frequency_coefficient_query);
                 commands.spawn(AngularFrequencyCoefficient(f));

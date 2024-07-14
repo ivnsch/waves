@@ -6,8 +6,8 @@ pub struct GuiInputs {
     pub amplitude: String,
     pub wave_length: String,
     pub frequency: String,
-    pub k_coeffient: String,
-    pub angular_frequency_coeffient: String,
+    pub k_coefficient: String,
+    pub angular_frequency_coefficient: String,
     pub phase: String,
 }
 
@@ -16,8 +16,8 @@ pub struct GuiInputsEvent {
     pub amplitude: String,
     pub wave_length: String,
     pub frequency: String,
-    pub k_coeffient: String,
-    pub angular_frequency_coeffient: String,
+    pub k_coefficient: String,
+    pub angular_frequency_coefficient: String,
     pub phase: String,
 }
 
@@ -26,8 +26,8 @@ pub struct GuiInputEntities {
     pub amplitude: Entity,
     pub wave_length: Entity,
     pub frequency: Entity,
-    pub k_coeffient: Entity,
-    pub angular_frequency_coeffient: Entity,
+    pub k_coefficient: Entity,
+    pub angular_frequency_coefficient: Entity,
     pub phase: Entity,
 }
 
@@ -90,14 +90,14 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
         &font,
         root_id,
         &mut commands,
-        "K coefficiet",
+        "K coefficient",
         KCoefficientMarker,
     );
-    let angular_frequency_coeffient_input = generate_input(
+    let angular_frequency_coefficient_input = generate_input(
         &font,
         root_id,
         &mut commands,
-        "Angular frequency coefficiet",
+        "Angular frequency coefficient",
         AngularCoefficientMarker,
     );
     let phase_input = generate_input(&font, root_id, &mut commands, "Phase", PhaseMarker);
@@ -106,8 +106,8 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
         amplitude: amplitude_input,
         wave_length: wave_length_input,
         frequency: frequency_input,
-        k_coeffient: k_coefficient_input,
-        angular_frequency_coeffient: angular_frequency_coeffient_input,
+        k_coefficient: k_coefficient_input,
+        angular_frequency_coefficient: angular_frequency_coefficient_input,
         phase: phase_input,
     });
 }
@@ -174,7 +174,6 @@ fn generate_wrapper() -> NodeBundle {
 
             ..default()
         },
-        // background_color: BackgroundColor(Color::GRAY),
         ..default()
     }
 }
@@ -217,15 +216,15 @@ pub fn text_listener(
         } else if event.entity == input_entities.frequency {
             println!("submitted frequency: {:?}", event.entity);
             inputs.frequency = event.value.clone();
-        } else if event.entity == input_entities.k_coeffient {
+        } else if event.entity == input_entities.k_coefficient {
             println!("submitted k coefficient: {:?}", event.entity);
-            inputs.k_coeffient = event.value.clone();
-        } else if event.entity == input_entities.angular_frequency_coeffient {
+            inputs.k_coefficient = event.value.clone();
+        } else if event.entity == input_entities.angular_frequency_coefficient {
             println!(
                 "submitted angular frequency coefficient: {:?}",
                 event.entity
             );
-            inputs.angular_frequency_coeffient = event.value.clone();
+            inputs.angular_frequency_coefficient = event.value.clone();
         } else if event.entity == input_entities.phase {
             println!("submitted phase: {:?}", event.entity);
             inputs.phase = event.value.clone();
@@ -243,8 +242,8 @@ pub fn form_state_notifier_system(
         amplitude: form_state.amplitude.clone(),
         wave_length: form_state.wave_length.clone(),
         frequency: form_state.frequency.clone(),
-        k_coeffient: form_state.k_coeffient.clone(),
-        angular_frequency_coeffient: form_state.angular_frequency_coeffient.clone(),
+        k_coefficient: form_state.k_coefficient.clone(),
+        angular_frequency_coefficient: form_state.angular_frequency_coefficient.clone(),
         phase: form_state.phase.clone(),
     });
 }
