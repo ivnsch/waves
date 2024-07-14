@@ -1,14 +1,12 @@
 use std::f32::consts::PI;
 
-use bevy::{
-    color::palettes::css::{BLUE, GRAY},
-    ecs::query::QuerySingleError,
-    prelude::*,
-};
-use bevy_simple_text_input::{TextInputInactive, TextInputPlugin, TextInputSystem};
+use bevy::{ecs::query::QuerySingleError, prelude::*};
+use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
 
 use crate::wave_gui::{
-    form_state_notifier_system, setup_wave_gui, text_listener, GuiInputs, GuiInputsEvent,
+    focus, form_state_notifier_system, listen_gui_inputs, setup_wave_gui, text_listener, Amplitude,
+    AngularFrequencyCoefficient, Frequency, GuiInputs, GuiInputsEvent, KCoefficient, Phase,
+    WaveLength,
 };
 
 #[allow(dead_code)]
@@ -143,116 +141,3 @@ fn draw_planar_fn_as_vert_vecs<F>(
 fn vert_x_arrow_out(x: f32, y: f32, gizmos: &mut Gizmos, color: Color) {
     gizmos.line_2d(Vec2::new(x, 0.0), Vec2::new(x, y), color);
 }
-
-// TODO error handling (show on ui)
-#[allow(clippy::too_many_arguments)]
-fn listen_gui_inputs(
-    mut events: EventReader<GuiInputsEvent>,
-    mut commands: Commands,
-    amplitude_query: Query<Entity, With<Amplitude>>,
-    wave_length_query: Query<Entity, With<WaveLength>>,
-    frequency_query: Query<Entity, With<Frequency>>,
-    k_coefficient_query: Query<Entity, With<KCoefficient>>,
-    angular_frequency_coefficient_query: Query<Entity, With<AngularFrequencyCoefficient>>,
-    phase_query: Query<Entity, With<Phase>>,
-) {
-    for input in events.read() {
-        // println!("got events in wave.rs: {:?}", input);
-        match parse_float(&input.amplitude) {
-            Ok(f) => {
-                despawn_all_entities(&mut commands, &amplitude_query);
-                commands.spawn(Amplitude(f));
-            }
-            Err(err) => println!("error: {}", err),
-        }
-        match parse_float(&input.wave_length) {
-            Ok(f) => {
-                despawn_all_entities(&mut commands, &wave_length_query);
-                commands.spawn(WaveLength(f));
-            }
-            Err(err) => println!("error: {}", err),
-        }
-        match parse_float(&input.frequency) {
-            Ok(f) => {
-                despawn_all_entities(&mut commands, &frequency_query);
-                commands.spawn(Frequency(f));
-            }
-            Err(err) => println!("error: {}", err),
-        }
-        match parse_float(&input.k_coefficient) {
-            Ok(f) => {
-                despawn_all_entities(&mut commands, &k_coefficient_query);
-                commands.spawn(KCoefficient(f));
-            }
-            Err(err) => println!("error: {}", err),
-        }
-        match parse_float(&input.angular_frequency_coefficient) {
-            Ok(f) => {
-                despawn_all_entities(&mut commands, &angular_frequency_coefficient_query);
-                commands.spawn(AngularFrequencyCoefficient(f));
-            }
-            Err(err) => println!("error: {}", err),
-        }
-        match parse_float(&input.phase) {
-            Ok(f) => {
-                despawn_all_entities(&mut commands, &phase_query);
-                commands.spawn(Phase(f));
-            }
-            Err(err) => println!("error: {}", err),
-        }
-    }
-}
-
-fn despawn_all_entities<T>(commands: &mut Commands, query: &Query<Entity, With<T>>)
-where
-    T: Component,
-{
-    for e in query.iter() {
-        commands.entity(e).despawn_recursive();
-    }
-}
-
-fn parse_float(str: &str) -> Result<f32, String> {
-    let f = str.parse::<f32>();
-    match f {
-        Ok(f) => Ok(f),
-        Err(e) => Err(format!("Failed to parse float: {}", e)),
-    }
-}
-
-fn focus(
-    query: Query<(Entity, &Interaction), Changed<Interaction>>,
-    mut text_input_query: Query<(Entity, &mut TextInputInactive, &mut BorderColor)>,
-) {
-    for (interaction_entity, interaction) in &query {
-        if *interaction == Interaction::Pressed {
-            for (entity, mut inactive, mut border_color) in &mut text_input_query {
-                if entity == interaction_entity {
-                    inactive.0 = false;
-                    *border_color = BLUE.into();
-                } else {
-                    inactive.0 = true;
-                    *border_color = GRAY.into();
-                }
-            }
-        }
-    }
-}
-
-#[derive(Component, Debug)]
-struct Amplitude(f32);
-
-#[derive(Component, Debug)]
-struct WaveLength(f32);
-
-#[derive(Component, Debug)]
-struct Frequency(f32);
-
-#[derive(Component, Debug)]
-struct KCoefficient(f32);
-
-#[derive(Component, Debug)]
-struct AngularFrequencyCoefficient(f32);
-
-#[derive(Component, Debug)]
-struct Phase(f32);
