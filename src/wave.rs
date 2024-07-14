@@ -96,48 +96,46 @@ fn vert_x_arrow_out(x: f32, y: f32, gizmos: &mut Gizmos, color: Color) {
     gizmos.arrow_2d(Vec2::new(x, 0.0), Vec2::new(x, y), color);
 }
 
+// TODO error handling (show on ui)
 fn listen_gui_inputs(
     mut events: EventReader<GuiInputsEvent>,
     mut commands: Commands,
-    query: Query<Entity, With<Amplitude>>,
-    query_w: Query<Entity, With<WaveLength>>,
+    amplitude_query: Query<Entity, With<Amplitude>>,
+    wave_length_query: Query<Entity, With<WaveLength>>,
 ) {
     for input in events.read() {
         // println!("got events in wave.rs: {:?}", input);
-        match process_amplitude_str(&input.amplitude) {
-            Ok(a) => {
-                for e in query.iter() {
-                    commands.entity(e).despawn_recursive();
-                }
-                commands.spawn(a);
+        match parse_float(&input.amplitude) {
+            Ok(f) => {
+                despawn_all_entities(&mut commands, &amplitude_query);
+                commands.spawn(Amplitude(f));
             }
-            Err(err) => println!("error: {}", err), // TODO error handling
+            Err(err) => println!("error: {}", err),
         }
-        match process_wave_length_str(&input.wave_length) {
-            Ok(w) => {
-                for e in query_w.iter() {
-                    commands.entity(e).despawn_recursive();
-                }
-                commands.spawn(w);
+        match parse_float(&input.wave_length) {
+            Ok(f) => {
+                despawn_all_entities(&mut commands, &wave_length_query);
+                commands.spawn(WaveLength(f));
             }
-            Err(err) => println!("error: {}", err), // TODO error handling
+            Err(err) => println!("error: {}", err),
         }
     }
 }
 
-fn process_amplitude_str(str: &str) -> Result<Amplitude, String> {
-    let a = str.parse::<f32>();
-    match a {
-        Ok(a) => Ok(Amplitude(a)),
-        Err(e) => Err(format!("Failed to parse input: {}", e)),
+fn despawn_all_entities<T>(commands: &mut Commands, query: &Query<Entity, With<T>>)
+where
+    T: Component,
+{
+    for e in query.iter() {
+        commands.entity(e).despawn_recursive();
     }
 }
 
-fn process_wave_length_str(str: &str) -> Result<WaveLength, String> {
-    let a = str.parse::<f32>();
-    match a {
-        Ok(a) => Ok(WaveLength(a)),
-        Err(e) => Err(format!("Failed to parse input: {}", e)),
+fn parse_float(str: &str) -> Result<f32, String> {
+    let f = str.parse::<f32>();
+    match f {
+        Ok(f) => Ok(f),
+        Err(e) => Err(format!("Failed to parse float: {}", e)),
     }
 }
 
