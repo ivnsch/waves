@@ -1,6 +1,7 @@
 use std::f32::consts::PI;
 
 use crate::camera_controller::{CameraController, CameraControllerPlugin};
+use crate::defocus::DefocusPlugin;
 use crate::rotator::{Rotator, RotatorPlugin};
 use bevy::color::palettes::css::{BLUE, GREEN, RED};
 use bevy::{
@@ -15,18 +16,23 @@ use bevy::{
 
 #[allow(dead_code)]
 pub fn add_3d_space(app: &mut App) {
-    app.add_plugins((DefaultPlugins, CameraControllerPlugin, RotatorPlugin))
-        .add_systems(
-            Startup,
-            (
-                setup_camera,
-                setup_light,
-                setup_x_axis_label,
-                setup_y_axis_label,
-                setup_z_axis_label,
-            ),
-        )
-        .add_systems(Update, (setup_axes, setup_global_axes));
+    app.add_plugins((
+        DefaultPlugins,
+        CameraControllerPlugin,
+        RotatorPlugin,
+        DefocusPlugin,
+    ))
+    .add_systems(
+        Startup,
+        (
+            setup_camera,
+            setup_light,
+            setup_x_axis_label,
+            setup_y_axis_label,
+            setup_z_axis_label,
+        ),
+    )
+    .add_systems(Update, (setup_axes, setup_global_axes));
 }
 
 fn setup_light(mut commands: Commands) {
