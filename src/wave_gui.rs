@@ -134,7 +134,7 @@ where
 
     let spawned_text_input_bundle = commands.spawn((marker, text_input_bundle)).id();
     commands
-        .entity(root_id)
+        .entity(spawned_wrapper)
         .push_children(&[spawned_text_input_bundle]);
 
     spawned_text_input_bundle
