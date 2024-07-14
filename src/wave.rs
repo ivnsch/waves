@@ -135,7 +135,7 @@ fn draw_planar_fn_as_vert_vecs<F>(
 }
 
 fn vert_x_arrow_out(x: f32, y: f32, gizmos: &mut Gizmos, color: Color) {
-    gizmos.arrow_2d(Vec2::new(x, 0.0), Vec2::new(x, y), color);
+    gizmos.line_2d(Vec2::new(x, 0.0), Vec2::new(x, y), color);
 }
 
 // TODO error handling (show on ui)
