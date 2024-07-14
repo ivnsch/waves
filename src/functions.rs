@@ -1,7 +1,7 @@
 use bevy::{
+    color::palettes::css::WHITE,
     math::{Vec2, Vec3},
     prelude::Gizmos,
-    render::color::Color,
 };
 
 /// draws function as a line
@@ -29,7 +29,7 @@ pub fn draw_line_fn<F>(
             gizmos.line(
                 Vec3::new(last_x * x_scaling, last_z * z_scaling, y),
                 Vec3::new(x * x_scaling, z * z_scaling, y),
-                Color::WHITE,
+                WHITE,
             );
         }
 
@@ -62,7 +62,7 @@ pub fn draw_line2d_fn<F>(
             gizmos.line_2d(
                 Vec2::new(last_x * x_scaling, last_z * z_scaling),
                 Vec2::new(x * x_scaling, z * z_scaling),
-                Color::WHITE,
+                WHITE,
             );
         }
 

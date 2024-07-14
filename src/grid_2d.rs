@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css::DARK_GRAY, prelude::*};
 
 #[allow(dead_code)]
 pub fn add_grid_2d_system(app: &mut App) {
@@ -8,7 +8,7 @@ pub fn add_grid_2d_system(app: &mut App) {
 fn draw_lines(mut gizmos: Gizmos) {
     let half_range = 300;
     let step_size = 10;
-    let color = Color::DARK_GRAY;
+    let color = DARK_GRAY;
 
     for line_pos_int in (-half_range..half_range).step_by(step_size) {
         let line_pos = line_pos_int as f32;

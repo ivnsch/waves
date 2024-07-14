@@ -2,6 +2,7 @@ use std::f32::consts::PI;
 
 use crate::camera_controller::{CameraController, CameraControllerPlugin};
 use crate::rotator::{Rotator, RotatorPlugin};
+use bevy::color::palettes::css::{BLUE, GREEN, RED};
 use bevy::{
     prelude::*,
     render::{
@@ -50,7 +51,7 @@ fn setup_global_axes(mut gizmos: Gizmos) {
             y: zero,
             z: zero,
         },
-        Color::GREEN,
+        GREEN,
     );
     // y
     gizmos.line(
@@ -64,7 +65,7 @@ fn setup_global_axes(mut gizmos: Gizmos) {
             y: size,
             z: zero,
         },
-        Color::RED,
+        RED,
     );
     // z
     gizmos.line(
@@ -78,7 +79,7 @@ fn setup_global_axes(mut gizmos: Gizmos) {
             y: zero,
             z: size,
         },
-        Color::BLUE,
+        BLUE,
     );
 }
 
@@ -97,7 +98,7 @@ fn setup_axes(mut gizmos: Gizmos) {
             y: zero,
             z: zero,
         },
-        Color::GREEN,
+        GREEN,
     );
     // y
     gizmos.line(
@@ -111,7 +112,7 @@ fn setup_axes(mut gizmos: Gizmos) {
             y: size,
             z: zero,
         },
-        Color::RED,
+        RED,
     );
     // z
     gizmos.line(
@@ -125,7 +126,7 @@ fn setup_axes(mut gizmos: Gizmos) {
             y: zero,
             z: size,
         },
-        Color::BLUE,
+        BLUE,
     );
 }
 

@@ -15,7 +15,7 @@ fn setup_plane(
         material: materials.add(StandardMaterial {
             double_sided: true,
             cull_mode: None,
-            base_color: Color::rgb(0.3, 0.5, 0.3),
+            base_color: Color::srgb(0.3, 0.5, 0.3),
             ..default()
         }),
         ..default()

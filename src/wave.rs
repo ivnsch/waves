@@ -1,6 +1,10 @@
 use std::f32::consts::PI;
 
-use bevy::{ecs::query::QuerySingleError, prelude::*};
+use bevy::{
+    color::palettes::css::{BLUE, GRAY},
+    ecs::query::QuerySingleError,
+    prelude::*,
+};
 use bevy_simple_text_input::{TextInputInactive, TextInputPlugin};
 
 use crate::wave_gui::{
@@ -222,10 +226,10 @@ fn focus(
             for (entity, mut inactive, mut border_color) in &mut text_input_query {
                 if entity == interaction_entity {
                     inactive.0 = false;
-                    *border_color = Color::BLUE.into();
+                    *border_color = BLUE.into();
                 } else {
                     inactive.0 = true;
-                    *border_color = Color::GRAY.into();
+                    *border_color = GRAY.into();
                 }
             }
         }

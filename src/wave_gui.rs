@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css::GRAY, prelude::*};
 use bevy_simple_text_input::{TextInputBundle, TextInputSubmitEvent};
 
 #[derive(Resource)]
@@ -196,8 +196,8 @@ fn generate_input() -> (NodeBundle, TextInputBundle) {
                 padding: UiRect::all(Val::Px(5.0)),
                 ..default()
             },
-            border_color: Color::GRAY.into(),
-            background_color: Color::GRAY.into(),
+            border_color: GRAY.into(),
+            background_color: GRAY.into(),
             ..default()
         },
         TextInputBundle::default().with_text_style(input),

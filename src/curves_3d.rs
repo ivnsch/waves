@@ -1,6 +1,9 @@
 use std::f32::consts::PI;
 
-use bevy::prelude::*;
+use bevy::{
+    color::palettes::css::{GREEN, WHITE},
+    prelude::*,
+};
 
 use crate::functions::draw_line_fn;
 
@@ -27,7 +30,7 @@ fn draw_sin_fn(mut gizmos: Gizmos, _time: Res<Time>) {
 #[allow(dead_code)]
 fn draw_sin_as_vert_vecs(mut gizmos: Gizmos, _time: Res<Time>) {
     let range = 20;
-    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, true, Color::WHITE, |x| x.sin());
+    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, true, WHITE, |x| x.sin());
     // animate
     // let t = time.elapsed_seconds();
     // draw_fn(gizmos, -10 + t as i32, 10 + t as i32, |x| x.sin());
@@ -55,8 +58,8 @@ fn draw_electromagnetic_wave(mut gizmos: Gizmos, time: Res<Time>) {
         amplitude * scalar
     };
 
-    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, true, Color::WHITE, function);
-    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, false, Color::GREEN, function);
+    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, true, WHITE, function);
+    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, false, GREEN, function);
 }
 
 /// draws planar function as a sequence of vectors,
@@ -66,7 +69,7 @@ fn draw_planar_fn_as_vert_vecs<F>(
     range_start: i32,
     range_end: i32,
     parallel_z: bool, // for now just z (true), y (false)
-    color: Color,
+    color: Srgba,
     function: F,
 ) where
     F: Fn(f32) -> f32,
@@ -100,6 +103,6 @@ fn draw_planar_fn_as_vert_vecs<F>(
     }
 }
 
-fn vert_x_arrow_out(x: f32, y: f32, z: f32, gizmos: &mut Gizmos, color: Color) {
+fn vert_x_arrow_out(x: f32, y: f32, z: f32, gizmos: &mut Gizmos, color: Srgba) {
     gizmos.arrow(Vec3::new(x, 0.0, 0.0), Vec3::new(x, y, z), color);
 }
