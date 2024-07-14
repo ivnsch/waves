@@ -1,5 +1,7 @@
 use bevy::{color::palettes::css::GRAY, prelude::*};
-use bevy_simple_text_input::{TextInputBundle, TextInputSettings, TextInputSubmitEvent};
+use bevy_simple_text_input::{
+    TextInputBundle, TextInputInactive, TextInputSettings, TextInputSubmitEvent,
+};
 
 #[derive(Resource)]
 pub struct GuiInputs {
@@ -205,6 +207,7 @@ fn generate_input() -> (NodeBundle, TextInputBundle) {
                 retain_on_submit: true,
                 ..default()
             },
+            inactive: TextInputInactive(true),
             ..default()
         }
         .with_text_style(input),
