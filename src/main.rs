@@ -12,6 +12,7 @@ mod system_2d;
 mod system_3d;
 mod wave;
 mod wave_gui;
+mod electromagnetic_wave_gui;
 
 use bevy::app::App;
 #[allow(unused_imports)]

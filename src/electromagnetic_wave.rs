@@ -5,11 +5,15 @@ use bevy::{
     prelude::*,
 };
 
-use crate::curves_3d::draw_planar_fn_as_vert_vecs;
+use crate::{
+    curves_3d::draw_planar_fn_as_vert_vecs,
+    electromagnetic_wave_gui::setup_electromagnetic_wave_gui,
+};
 
 #[allow(dead_code)]
 pub fn add_electromagnetic_wave(app: &mut App) {
-    app.add_systems(Update, draw_electromagnetic_wave);
+    app.add_systems(Update, draw_electromagnetic_wave)
+        .add_systems(Startup, setup_electromagnetic_wave_gui);
 }
 
 fn draw_electromagnetic_wave(mut gizmos: Gizmos, time: Res<Time>) {
