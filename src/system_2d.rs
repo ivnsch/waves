@@ -1,7 +1,4 @@
-use bevy::{
-    color::palettes::css::{GREEN, RED},
-    prelude::*,
-};
+use bevy::{color::palettes::css::GREEN, prelude::*};
 
 pub fn add_2d_space(app: &mut App) {
     app.add_plugins(DefaultPlugins)
@@ -30,5 +27,5 @@ fn setup_axes(mut gizmos: Gizmos) {
     // x
     gizmos.line_2d(Vec2 { x: -size, y: zero }, Vec2 { x: size, y: zero }, GREEN);
     // y
-    gizmos.line_2d(Vec2 { x: zero, y: -size }, Vec2 { x: zero, y: size }, RED);
+    gizmos.line_2d(Vec2 { x: zero, y: -size }, Vec2 { x: zero, y: size }, GREEN);
 }
