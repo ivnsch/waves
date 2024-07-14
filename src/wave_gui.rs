@@ -7,6 +7,7 @@ pub struct GuiInputs {
     pub wave_length: String,
     pub frequency: String,
     pub k_coeffient: String,
+    pub angular_frequency_coeffient: String,
 }
 
 #[derive(Event, Default, Debug)]
@@ -15,6 +16,7 @@ pub struct GuiInputsEvent {
     pub wave_length: String,
     pub frequency: String,
     pub k_coeffient: String,
+    pub angular_frequency_coeffient: String,
 }
 
 #[derive(Resource)]
@@ -23,6 +25,7 @@ pub struct GuiInputEntities {
     pub wave_length: Entity,
     pub frequency: Entity,
     pub k_coeffient: Entity,
+    pub angular_frequency_coeffient: Entity,
 }
 
 /// marker component for amplitude text input
@@ -35,6 +38,8 @@ pub struct WaveLengthInputMarker;
 pub struct FrequencyInputMarker;
 #[derive(Component, Default)]
 pub struct KCoefficientMarker;
+#[derive(Component, Default)]
+pub struct AngularCoefficientMarker;
 
 pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/FiraMono-Medium.ttf");
@@ -83,12 +88,20 @@ pub fn setup_wave_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
         "K coefficiet",
         KCoefficientMarker,
     );
+    let angular_frequency_coeffient_input = generate_input(
+        &font,
+        root_id,
+        &mut commands,
+        "Angular frequency coefficiet",
+        AngularCoefficientMarker,
+    );
 
     commands.insert_resource(GuiInputEntities {
         amplitude: amplitude_input,
         wave_length: wave_length_input,
         frequency: frequency_input,
         k_coeffient: k_coefficient_input,
+        angular_frequency_coeffient: angular_frequency_coeffient_input,
     });
 }
 
@@ -200,6 +213,12 @@ pub fn text_listener(
         } else if event.entity == input_entities.k_coeffient {
             println!("submitted k coefficient: {:?}", event.entity);
             inputs.k_coeffient = event.value.clone();
+        } else if event.entity == input_entities.angular_frequency_coeffient {
+            println!(
+                "submitted angular frequency coefficient: {:?}",
+                event.entity
+            );
+            inputs.angular_frequency_coeffient = event.value.clone();
         } else {
             println!("unknown entity: {:?}", event.entity);
         }
@@ -215,5 +234,6 @@ pub fn form_state_notifier_system(
         wave_length: form_state.wave_length.clone(),
         frequency: form_state.frequency.clone(),
         k_coeffient: form_state.k_coeffient.clone(),
+        angular_frequency_coeffient: form_state.angular_frequency_coeffient.clone(),
     });
 }
