@@ -4,16 +4,29 @@ use bevy::{
     color::palettes::css::{GREEN, WHITE},
     prelude::*,
 };
+use bevy_simple_text_input::TextInputPlugin;
 
 use crate::{
     curves_3d::draw_planar_fn_as_vert_vecs,
     electromagnetic_wave_gui::setup_electromagnetic_wave_gui,
+    wave_gui::{setup_wave_gui, GuiInputs, GuiInputsEvent},
 };
 
 #[allow(dead_code)]
 pub fn add_electromagnetic_wave(app: &mut App) {
-    app.add_systems(Update, draw_electromagnetic_wave)
-        .add_systems(Startup, setup_electromagnetic_wave_gui);
+    app.add_event::<GuiInputsEvent>()
+        .add_plugins(TextInputPlugin)
+        .insert_resource(GuiInputs {
+            amplitude: "1".to_owned(),
+            wave_length: "2".to_owned(),
+            frequency: "0.5".to_owned(),
+            k_coefficient: "2".to_owned(),
+            angular_frequency_coefficient: "2".to_owned(),
+            phase: "0".to_owned(),
+        })
+        .add_systems(Update, (draw_electromagnetic_wave,))
+        .add_systems(Startup, setup_electromagnetic_wave_gui)
+        .add_systems(Startup, setup_wave_gui);
 }
 
 fn draw_electromagnetic_wave(mut gizmos: Gizmos, time: Res<Time>) {
