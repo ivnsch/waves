@@ -17,14 +17,23 @@ use crate::{
     },
 };
 
+// let's define the distance unit as 100000 km
+const SPEED_OF_LIGHT: f64 = 3.0; // 3 * 100000 km / s
+
 #[allow(dead_code)]
 pub fn add_electromagnetic_wave(app: &mut App) {
+    // this would be a wave length of 200000 km - not something that's typically dealt with, but looks good on the sim
+    let wave_length = 2.0;
+    // ensure c=fλ
+    // note: for now *not* correcting new user inputs to speed of light
+    let frequency = calculate_frequency(wave_length);
+
     app.add_event::<GuiInputsEvent>()
         .add_plugins(TextInputPlugin)
         .insert_resource(GuiInputs {
             amplitude: "1".to_owned(),
-            wave_length: "2".to_owned(),
-            frequency: "0.5".to_owned(),
+            wave_length: wave_length.to_string(),
+            frequency: frequency.to_string(),
             k_coefficient: "2".to_owned(),
             angular_frequency_coefficient: "2".to_owned(),
             phase: "0".to_owned(),
@@ -43,6 +52,15 @@ pub fn add_electromagnetic_wave(app: &mut App) {
         .add_systems(Startup, setup_wave_gui);
 }
 
+fn calculate_frequency(wave_length: f64) -> f64 {
+    SPEED_OF_LIGHT / wave_length
+}
+
+#[allow(dead_code)]
+fn calculate_wave_length(frequency: f64) -> f64 {
+    SPEED_OF_LIGHT / frequency
+}
+
 #[allow(clippy::too_many_arguments)]
 fn draw_electromagnetic_wave(
     gizmos: Gizmos,
@@ -53,6 +71,7 @@ fn draw_electromagnetic_wave(
     k_coefficient: Query<&KCoefficient>,
     angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
     phase: Query<&Phase>,
+    mut inputs: ResMut<GuiInputs>,
 ) {
     match draw_electromagnetic_wave_internal(
         gizmos,
