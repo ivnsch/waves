@@ -240,6 +240,7 @@ pub fn text_listener(
     input_entities: Res<GuiInputEntities>,
 ) {
     for event in events.read() {
+        println!("read an event");
         if event.entity == input_entities.amplitude {
             info!("submitted amplitude: {}", event.value);
             inputs.amplitude = event.value.clone();
@@ -267,10 +268,13 @@ pub fn text_listener(
     }
 }
 
+/// sends an event with all current form inputs strings, to be processed further somewhere else
+/// TODO don't send this event constantly, ideally only when pressing enter in a field
 pub fn form_state_notifier_system(
     form_state: Res<GuiInputs>,
     mut my_events: EventWriter<GuiInputsEvent>,
 ) {
+    // println!("called form_state_notifier_system");
     my_events.send(GuiInputsEvent {
         amplitude: form_state.amplitude.clone(),
         wave_length: form_state.wave_length.clone(),
@@ -281,6 +285,7 @@ pub fn form_state_notifier_system(
     });
 }
 
+/// processes the gui events
 // TODO error handling (show on ui)
 #[allow(clippy::too_many_arguments)]
 pub fn listen_gui_inputs(
