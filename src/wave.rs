@@ -6,7 +6,10 @@ use crate::wave_gui::{
 };
 use bevy::{ecs::query::QuerySingleError, prelude::*};
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
-use uom::si::{angle::radian, f32::Length, frequency::hertz, length::kilometer, time::second};
+use uom::si::{
+    angle::radian, f32::Length, frequency::hertz, length::kilometer,
+    linear_number_density::per_kilometer, time::second,
+};
 
 #[allow(dead_code)]
 pub fn add_wave_2d_system(app: &mut App) {
@@ -115,13 +118,13 @@ pub struct UserParameters {
 /// nice explanation https://physics.stackexchange.com/a/259007
 #[allow(clippy::too_many_arguments)]
 pub fn calculate_u(x: Length, t: uom::si::f32::Time, up: &UserParameters) -> Length {
-    let k: Length =
-        Length::new::<kilometer>(up.k_coefficient.0 * PI / up.wave_length.0.get::<kilometer>()); // wave cycles per unit distance
+    // wave cycles per unit distance
+    // there might be reciprocal units on uom? (1/kilometer here), for now implicit
+    let k = up.k_coefficient.0 * PI / up.wave_length.0.get::<kilometer>();
 
     let angular_frequency = up.angular_frequency_coefficient.0 * PI * up.frequency.0.get::<hertz>();
 
-    let scalar = ((k.get::<kilometer>() * x.get::<kilometer>())
-        - (angular_frequency * t.get::<second>())
+    let scalar = ((k * x.get::<kilometer>()) - (angular_frequency * t.get::<second>())
         + up.phase.0.get::<radian>())
     .cos();
 
