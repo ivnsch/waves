@@ -11,7 +11,7 @@ use uom::si::{angle::radian, f32::Length, frequency::hertz, length::kilometer, t
 use crate::{
     curves_3d::draw_planar_fn_as_vert_vecs,
     electromagnetic_wave_gui::setup_electromagnetic_wave_gui,
-    wave::calculate_u,
+    wave::{calculate_u, UserParameters},
     wave_gui::{
         focus, form_state_notifier_system, listen_gui_inputs, setup_wave_gui, text_listener,
         Amplitude, AngularFrequencyCoefficient, Freq, GuiInputs, GuiInputsEvent, KCoefficient,
@@ -110,33 +110,22 @@ fn draw_electromagnetic_wave_internal(
     angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
     phase: Query<&Phase>,
 ) -> Result<(), QuerySingleError> {
-    let amplitude = amplitude.get_single()?;
-    let wave_length = wave_length.get_single()?;
-    let frequency = frequency.get_single()?;
-    let k_coefficient = k_coefficient.get_single()?;
-    let angular_frequency_coefficient = angular_frequency_coefficient.get_single()?;
-    let phase = phase.get_single()?;
+    let user_pars = UserParameters {
+        amplitude: *amplitude.get_single()?,
+        wave_length: *wave_length.get_single()?,
+        frequency: *frequency.get_single()?,
+        k_coefficient: *k_coefficient.get_single()?,
+        angular_frequency_coefficient: *angular_frequency_coefficient.get_single()?,
+        phase: *phase.get_single()?,
+    };
 
     let range = 20;
 
     let t = uom::si::f32::Time::new::<second>(time.elapsed_seconds());
     // let t = uom::si::f32::Time::new::<second>(0);  // not animated
 
-    // equation of travelling wave: u(x,t)=Acos(kx−ωt)
-    // nice explanation https://physics.stackexchange.com/a/259007
-    let function = |x: f32| {
-        calculate_u(
-            Length::new::<kilometer>(x),
-            t,
-            amplitude,
-            wave_length,
-            frequency,
-            k_coefficient,
-            angular_frequency_coefficient,
-            phase,
-        )
-        .get::<kilometer>()
-    };
+    let function =
+        |x: f32| calculate_u(Length::new::<kilometer>(x), t, &user_pars).get::<kilometer>();
 
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, true, WHITE, function);
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, false, GREEN, function);

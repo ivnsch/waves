@@ -79,61 +79,53 @@ fn draw_wave_internal(
     angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
     phase: Query<&Phase>,
 ) -> Result<(), QuerySingleError> {
-    let amplitude = amplitude.get_single()?;
-    let wave_length = wave_length.get_single()?;
-    let frequency = frequency.get_single()?;
-    let k_coefficient = k_coefficient.get_single()?;
-    let angular_frequency_coefficient = angular_frequency_coefficient.get_single()?;
-    let phase = phase.get_single()?;
+    let user_pars = UserParameters {
+        amplitude: *amplitude.get_single()?,
+        wave_length: *wave_length.get_single()?,
+        frequency: *frequency.get_single()?,
+        k_coefficient: *k_coefficient.get_single()?,
+        angular_frequency_coefficient: *angular_frequency_coefficient.get_single()?,
+        phase: *phase.get_single()?,
+    };
 
     let range = 20;
 
     let t = uom::si::f32::Time::new::<second>(time.elapsed_seconds());
     // let t = uom::si::f32::Time::new::<second>(0);  // not animated
 
-    // equation of travelling wave: u(x,t)=Acos(kx−ωt)
-    // nice explanation https://physics.stackexchange.com/a/259007
-    let function = |x: f32| {
-        calculate_u(
-            Length::new::<kilometer>(x),
-            t,
-            amplitude,
-            wave_length,
-            frequency,
-            k_coefficient,
-            angular_frequency_coefficient,
-            phase,
-        )
-        .get::<kilometer>()
-    };
+    let function =
+        |x: f32| calculate_u(Length::new::<kilometer>(x), t, &user_pars).get::<kilometer>();
 
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, Color::WHITE, function);
 
     Ok(())
 }
 
-#[allow(clippy::too_many_arguments)]
-pub fn calculate_u(
-    x: Length,
-    t: uom::si::f32::Time,
-    amplitude: &Amplitude,
-    wave_length: &WaveLength,
-    frequency: &Freq,
-    k_coefficient: &KCoefficient,
-    angular_frequency_coefficient: &AngularFrequencyCoefficient,
-    phase: &Phase,
-) -> Length {
-    let k: Length =
-        Length::new::<kilometer>(k_coefficient.0 * PI / wave_length.0.get::<kilometer>()); // wave cycles per unit distance
+#[derive(Debug)]
+pub struct UserParameters {
+    pub amplitude: Amplitude,
+    pub wave_length: WaveLength,
+    pub frequency: Freq,
+    pub k_coefficient: KCoefficient,
+    pub angular_frequency_coefficient: AngularFrequencyCoefficient,
+    pub phase: Phase,
+}
 
-    let angular_frequency = angular_frequency_coefficient.0 * PI * frequency.0.get::<hertz>();
+/// equation of travelling wave: u(x,t)=Acos(kx−ωt)
+/// nice explanation https://physics.stackexchange.com/a/259007
+#[allow(clippy::too_many_arguments)]
+pub fn calculate_u(x: Length, t: uom::si::f32::Time, up: &UserParameters) -> Length {
+    let k: Length =
+        Length::new::<kilometer>(up.k_coefficient.0 * PI / up.wave_length.0.get::<kilometer>()); // wave cycles per unit distance
+
+    let angular_frequency = up.angular_frequency_coefficient.0 * PI * up.frequency.0.get::<hertz>();
 
     let scalar = ((k.get::<kilometer>() * x.get::<kilometer>())
         - (angular_frequency * t.get::<second>())
-        + phase.0.get::<radian>())
+        + up.phase.0.get::<radian>())
     .cos();
 
-    Length::new::<kilometer>(amplitude.0.get::<kilometer>() * scalar)
+    Length::new::<kilometer>(up.amplitude.0.get::<kilometer>() * scalar)
 }
 
 /// draws planar function as a sequence of vectors,
