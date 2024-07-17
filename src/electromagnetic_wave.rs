@@ -1,12 +1,10 @@
-use std::f32::consts::PI;
-
 use bevy::{
     color::palettes::css::{GREEN, WHITE},
     ecs::query::QuerySingleError,
     prelude::*,
 };
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
-use uom::si::{angle::radian, f32::Length, frequency::hertz, length::kilometer, time::second};
+use uom::si::{f32::Length, length::kilometer, time::second};
 
 use crate::{
     curves_3d::draw_planar_fn_as_vert_vecs,
@@ -73,7 +71,6 @@ fn draw_electromagnetic_wave(
     k_coefficient: Query<&KCoefficient>,
     angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
     phase: Query<&Phase>,
-    mut inputs: ResMut<GuiInputs>,
 ) {
     match draw_electromagnetic_wave_internal(
         gizmos,

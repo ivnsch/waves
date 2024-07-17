@@ -6,10 +6,7 @@ use crate::wave_gui::{
 };
 use bevy::{ecs::query::QuerySingleError, prelude::*};
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
-use uom::si::{
-    angle::radian, f32::Length, frequency::hertz, length::kilometer,
-    linear_number_density::per_kilometer, time::second,
-};
+use uom::si::{angle::radian, f32::Length, frequency::hertz, length::kilometer, time::second};
 
 #[allow(dead_code)]
 pub fn add_wave_2d_system(app: &mut App) {
