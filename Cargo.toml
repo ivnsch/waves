@@ -9,3 +9,4 @@ edition = "2021"
 # bevy = "0.14.0-rc.2"
 bevy = { version = "0.14.0" }
 bevy_simple_text_input = "0.8.0"
+uom = "0.36.0"

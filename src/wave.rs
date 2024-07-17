@@ -1,13 +1,12 @@
 use std::f32::consts::PI;
 
-use bevy::{ecs::query::QuerySingleError, prelude::*};
-use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
-
 use crate::wave_gui::{
     focus, form_state_notifier_system, listen_gui_inputs, setup_wave_gui, text_listener, Amplitude,
-    AngularFrequencyCoefficient, Frequency, GuiInputs, GuiInputsEvent, KCoefficient, Phase,
-    WaveLength,
+    AngularFrequencyCoefficient, Freq, GuiInputs, GuiInputsEvent, KCoefficient, Phase, WaveLength,
 };
+use bevy::{ecs::query::QuerySingleError, prelude::*};
+use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
+use uom::si::{angle::radian, f32::Length, frequency::hertz, length::kilometer, time::second};
 
 #[allow(dead_code)]
 pub fn add_wave_2d_system(app: &mut App) {
@@ -40,7 +39,7 @@ fn draw_wave(
     time: Res<Time>,
     amplitude: Query<&Amplitude>,
     wave_length: Query<&WaveLength>,
-    frequency: Query<&Frequency>,
+    frequency: Query<&Freq>,
     k_coefficient: Query<&KCoefficient>,
     angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
     phase: Query<&Phase>,
@@ -75,7 +74,7 @@ fn draw_wave_internal(
     time: Res<Time>,
     amplitude: Query<&Amplitude>,
     wave_length: Query<&WaveLength>,
-    frequency: Query<&Frequency>,
+    frequency: Query<&Freq>,
     k_coefficient: Query<&KCoefficient>,
     angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
     phase: Query<&Phase>,
@@ -89,17 +88,24 @@ fn draw_wave_internal(
 
     let range = 20;
 
-    let t = time.elapsed_seconds();
-    // let t = 0.0; // not animated
+    let t = uom::si::f32::Time::new::<second>(time.elapsed_seconds());
+    // let t = uom::si::f32::Time::new::<second>(0);  // not animated
 
     // equation of travelling wave: u(x,t)=Acos(kx−ωt)
     // nice explanation https://physics.stackexchange.com/a/259007
     let function = |x: f32| {
-        let k = k_coefficient.0 * PI / wave_length.0; // wave cycles per unit distance
-        let angular_frequency = angular_frequency_coefficient.0 * PI * frequency.0;
-        let scalar = ((k * x) - angular_frequency * t + phase.0).cos();
+        let x: Length = Length::new::<kilometer>(x);
+        let k: Length =
+            Length::new::<kilometer>(k_coefficient.0 * PI / wave_length.0.get::<kilometer>()); // wave cycles per unit distance
 
-        amplitude.0 * scalar
+        let angular_frequency = angular_frequency_coefficient.0 * PI * frequency.0.get::<hertz>();
+
+        let scalar = ((k.get::<kilometer>() * x.get::<kilometer>())
+            - (angular_frequency * t.get::<second>())
+            + phase.0.get::<radian>())
+        .cos();
+
+        amplitude.0.get::<kilometer>() * scalar
     };
 
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, Color::WHITE, function);
