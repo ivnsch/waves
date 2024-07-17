@@ -11,6 +11,7 @@ use uom::si::{angle::radian, f32::Length, frequency::hertz, length::kilometer, t
 use crate::{
     curves_3d::draw_planar_fn_as_vert_vecs,
     electromagnetic_wave_gui::setup_electromagnetic_wave_gui,
+    wave::calculate_u,
     wave_gui::{
         focus, form_state_notifier_system, listen_gui_inputs, setup_wave_gui, text_listener,
         Amplitude, AngularFrequencyCoefficient, Freq, GuiInputs, GuiInputsEvent, KCoefficient,
@@ -124,18 +125,17 @@ fn draw_electromagnetic_wave_internal(
     // equation of travelling wave: u(x,t)=Acos(kx−ωt)
     // nice explanation https://physics.stackexchange.com/a/259007
     let function = |x: f32| {
-        let x: Length = Length::new::<kilometer>(x);
-        let k: Length =
-            Length::new::<kilometer>(k_coefficient.0 * PI / wave_length.0.get::<kilometer>()); // wave cycles per unit distance
-
-        let angular_frequency = angular_frequency_coefficient.0 * PI * frequency.0.get::<hertz>();
-
-        let scalar = ((k.get::<kilometer>() * x.get::<kilometer>())
-            - (angular_frequency * t.get::<second>())
-            + phase.0.get::<radian>())
-        .cos();
-
-        amplitude.0.get::<kilometer>() * scalar
+        calculate_u(
+            Length::new::<kilometer>(x),
+            t,
+            amplitude,
+            wave_length,
+            frequency,
+            k_coefficient,
+            angular_frequency_coefficient,
+            phase,
+        )
+        .get::<kilometer>()
     };
 
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, true, WHITE, function);
