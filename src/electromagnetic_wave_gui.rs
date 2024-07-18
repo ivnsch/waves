@@ -7,10 +7,7 @@ use uom::si::{
     length::meter,
 };
 
-use crate::wave_gui::{
-    despawn_all_entities, parse_float, AngularFrequencyCoefficient, Freq, GuiInputsEvent,
-    KCoefficient, Phase, WaveLength,
-};
+use crate::wave_gui::{despawn_all_entities, parse_float, Freq, GuiInputsEvent, Phase, WaveLength};
 
 pub fn setup_electromagnetic_wave_gui(commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/FiraMono-Medium.ttf");
@@ -71,8 +68,6 @@ pub fn listen_electromagnetic_wave_gui_inputs(
     amplitude_query: Query<Entity, With<ElectromagneticAmplitude>>,
     wave_length_query: Query<Entity, With<WaveLength>>,
     frequency_query: Query<Entity, With<Freq>>,
-    k_coefficient_query: Query<Entity, With<KCoefficient>>,
-    angular_frequency_coefficient_query: Query<Entity, With<AngularFrequencyCoefficient>>,
     phase_query: Query<Entity, With<Phase>>,
 ) {
     for input in events.read() {
@@ -97,20 +92,6 @@ pub fn listen_electromagnetic_wave_gui_inputs(
             Ok(f) => {
                 despawn_all_entities(&mut commands, &frequency_query);
                 commands.spawn(Freq(Frequency::new::<hertz>(f)));
-            }
-            Err(err) => println!("error: {}", err),
-        }
-        match parse_float(&input.k_coefficient) {
-            Ok(f) => {
-                despawn_all_entities(&mut commands, &k_coefficient_query);
-                commands.spawn(KCoefficient(f));
-            }
-            Err(err) => println!("error: {}", err),
-        }
-        match parse_float(&input.angular_frequency_coefficient) {
-            Ok(f) => {
-                despawn_all_entities(&mut commands, &angular_frequency_coefficient_query);
-                commands.spawn(AngularFrequencyCoefficient(f));
             }
             Err(err) => println!("error: {}", err),
         }

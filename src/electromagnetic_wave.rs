@@ -19,9 +19,8 @@ use crate::{
     },
     wave::{calculate_u_raw, RawUserParameters},
     wave_gui::{
-        focus, form_state_notifier_system, setup_wave_gui, text_listener,
-        AngularFrequencyCoefficient, Freq, GuiInputs, GuiInputsEvent, KCoefficient, Phase,
-        WaveLength,
+        focus, form_state_notifier_system, setup_wave_gui, text_listener, Freq, GuiInputs,
+        GuiInputsEvent, Phase, WaveLength,
     },
 };
 
@@ -41,8 +40,6 @@ pub fn add_electromagnetic_wave(app: &mut App) {
             amplitude: "1".to_owned(),
             wave_length: wave_length.to_string(),
             frequency: frequency.to_string(),
-            k_coefficient: "2".to_owned(),
-            angular_frequency_coefficient: "2".to_owned(),
             phase: "0".to_owned(),
         })
         .add_systems(Update, focus.before(TextInputSystem))
@@ -75,20 +72,10 @@ fn draw_electromagnetic_wave(
     amplitude: Query<&ElectromagneticAmplitude>,
     wave_length: Query<&WaveLength>,
     frequency: Query<&Freq>,
-    k_coefficient: Query<&KCoefficient>,
-    angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
     phase: Query<&Phase>,
 ) {
-    match draw_electromagnetic_wave_internal(
-        gizmos,
-        time,
-        amplitude,
-        wave_length,
-        frequency,
-        k_coefficient,
-        angular_frequency_coefficient,
-        phase,
-    ) {
+    match draw_electromagnetic_wave_internal(gizmos, time, amplitude, wave_length, frequency, phase)
+    {
         Ok(_) => {}
         Err(e) => match e {
             QuerySingleError::NoEntities(s) => {
@@ -110,16 +97,12 @@ fn draw_electromagnetic_wave_internal(
     amplitude: Query<&ElectromagneticAmplitude>,
     wave_length: Query<&WaveLength>,
     frequency: Query<&Freq>,
-    k_coefficient: Query<&KCoefficient>,
-    angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
     phase: Query<&Phase>,
 ) -> Result<(), QuerySingleError> {
     let user_pars = ElectromagneticWaveUserParameters {
         amplitude: *amplitude.get_single()?,
         wave_length: *wave_length.get_single()?,
         frequency: *frequency.get_single()?,
-        k_coefficient: *k_coefficient.get_single()?,
-        angular_frequency_coefficient: *angular_frequency_coefficient.get_single()?,
         phase: *phase.get_single()?,
     };
 
@@ -142,8 +125,6 @@ pub struct ElectromagneticWaveUserParameters {
     pub amplitude: ElectromagneticAmplitude,
     pub wave_length: WaveLength,
     pub frequency: Freq,
-    pub k_coefficient: KCoefficient,
-    pub angular_frequency_coefficient: AngularFrequencyCoefficient,
     pub phase: Phase,
 }
 
@@ -153,8 +134,6 @@ impl From<ElectromagneticWaveUserParameters> for RawUserParameters {
             amplitude: p.amplitude.0.get::<volt_per_meter>(),
             wave_length: p.wave_length,
             frequency: p.frequency,
-            k_coefficient: p.k_coefficient,
-            angular_frequency_coefficient: p.angular_frequency_coefficient,
             phase: p.phase,
         }
     }

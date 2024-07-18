@@ -2,8 +2,7 @@ use std::f32::consts::PI;
 
 use crate::wave_gui::{
     focus, form_state_notifier_system, listen_wave_gui_inputs, setup_wave_gui, text_listener,
-    Amplitude, AngularFrequencyCoefficient, Freq, GuiInputs, GuiInputsEvent, KCoefficient, Phase,
-    WaveLength,
+    Amplitude, Freq, GuiInputs, GuiInputsEvent, Phase, WaveLength,
 };
 use bevy::{ecs::query::QuerySingleError, prelude::*};
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
@@ -23,8 +22,6 @@ pub fn add_wave_2d_system(app: &mut App) {
             amplitude: "1".to_owned(),
             wave_length: "2".to_owned(),
             frequency: "0.5".to_owned(),
-            k_coefficient: "2".to_owned(),
-            angular_frequency_coefficient: "2".to_owned(),
             phase: "0".to_owned(),
         })
         .add_systems(Startup, setup_wave_gui)
@@ -47,20 +44,9 @@ fn draw_wave(
     amplitude: Query<&Amplitude>,
     wave_length: Query<&WaveLength>,
     frequency: Query<&Freq>,
-    k_coefficient: Query<&KCoefficient>,
-    angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
     phase: Query<&Phase>,
 ) {
-    match draw_wave_internal(
-        gizmos,
-        time,
-        amplitude,
-        wave_length,
-        frequency,
-        k_coefficient,
-        angular_frequency_coefficient,
-        phase,
-    ) {
+    match draw_wave_internal(gizmos, time, amplitude, wave_length, frequency, phase) {
         Ok(_) => {}
         Err(e) => match e {
             QuerySingleError::NoEntities(s) => {
@@ -82,16 +68,12 @@ fn draw_wave_internal(
     amplitude: Query<&Amplitude>,
     wave_length: Query<&WaveLength>,
     frequency: Query<&Freq>,
-    k_coefficient: Query<&KCoefficient>,
-    angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
     phase: Query<&Phase>,
 ) -> Result<(), QuerySingleError> {
     let user_pars = WaveUserParameters {
         amplitude: *amplitude.get_single()?,
         wave_length: *wave_length.get_single()?,
         frequency: *frequency.get_single()?,
-        k_coefficient: *k_coefficient.get_single()?,
-        angular_frequency_coefficient: *angular_frequency_coefficient.get_single()?,
         phase: *phase.get_single()?,
     };
 
@@ -112,8 +94,6 @@ pub struct WaveUserParameters {
     pub amplitude: Amplitude,
     pub wave_length: WaveLength,
     pub frequency: Freq,
-    pub k_coefficient: KCoefficient,
-    pub angular_frequency_coefficient: AngularFrequencyCoefficient,
     pub phase: Phase,
 }
 
@@ -124,8 +104,6 @@ pub struct RawUserParameters {
     pub amplitude: f32,
     pub wave_length: WaveLength,
     pub frequency: Freq,
-    pub k_coefficient: KCoefficient,
-    pub angular_frequency_coefficient: AngularFrequencyCoefficient,
     pub phase: Phase,
 }
 
@@ -135,8 +113,6 @@ impl From<WaveUserParameters> for RawUserParameters {
             amplitude: p.amplitude.0.get::<meter>(),
             wave_length: p.wave_length,
             frequency: p.frequency,
-            k_coefficient: p.k_coefficient,
-            angular_frequency_coefficient: p.angular_frequency_coefficient,
             phase: p.phase,
         }
     }
@@ -156,10 +132,9 @@ pub fn calculate_u_raw(x: Length, t: uom::si::f32::Time, up: &RawUserParameters)
 
     // wave cycles per unit distance
     // there might be reciprocal units on uom? (1/meter here), for now implicit
-    let k = up.k_coefficient.0 * PI / screen_speed_pars.wave_length.get::<meter>();
+    let k = 2.0 * PI / screen_speed_pars.wave_length.get::<meter>();
 
-    let angular_frequency =
-        up.angular_frequency_coefficient.0 * PI * screen_speed_pars.frequency.get::<hertz>();
+    let angular_frequency = 2.0 * PI * screen_speed_pars.frequency.get::<hertz>();
 
     let scalar = ((k * x.get::<meter>()) - (angular_frequency * t.get::<second>())
         + up.phase.0.get::<radian>())

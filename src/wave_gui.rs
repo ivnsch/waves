@@ -17,8 +17,6 @@ pub struct GuiInputs {
     pub amplitude: String,
     pub wave_length: String,
     pub frequency: String,
-    pub k_coefficient: String,
-    pub angular_frequency_coefficient: String,
     pub phase: String,
 }
 
@@ -27,8 +25,6 @@ pub struct GuiInputsEvent {
     pub amplitude: String,
     pub wave_length: String,
     pub frequency: String,
-    pub k_coefficient: String,
-    pub angular_frequency_coefficient: String,
     pub phase: String,
 }
 
@@ -37,8 +33,6 @@ pub struct GuiInputEntities {
     pub amplitude: Entity,
     pub wave_length: Entity,
     pub frequency: Entity,
-    pub k_coefficient: Entity,
-    pub angular_frequency_coefficient: Entity,
     pub phase: Entity,
 }
 
@@ -104,22 +98,6 @@ pub fn setup_wave_gui(
         FrequencyInputMarker,
         form_state.frequency.clone(),
     );
-    let k_coefficient_input = generate_input_box(
-        &font,
-        root_id,
-        &mut commands,
-        "K coefficient",
-        KCoefficientMarker,
-        form_state.k_coefficient.clone(),
-    );
-    let angular_frequency_coefficient_input = generate_input_box(
-        &font,
-        root_id,
-        &mut commands,
-        "Angular frequency coefficient",
-        AngularCoefficientMarker,
-        form_state.angular_frequency_coefficient.clone(),
-    );
     let phase_input = generate_input_box(
         &font,
         root_id,
@@ -133,8 +111,6 @@ pub fn setup_wave_gui(
         amplitude: amplitude_input,
         wave_length: wave_length_input,
         frequency: frequency_input,
-        k_coefficient: k_coefficient_input,
-        angular_frequency_coefficient: angular_frequency_coefficient_input,
         phase: phase_input,
     });
 }
@@ -256,15 +232,6 @@ pub fn text_listener(
         } else if event.entity == input_entities.frequency {
             println!("submitted frequency: {:?}", event.entity);
             inputs.frequency = event.value.clone();
-        } else if event.entity == input_entities.k_coefficient {
-            println!("submitted k coefficient: {:?}", event.entity);
-            inputs.k_coefficient = event.value.clone();
-        } else if event.entity == input_entities.angular_frequency_coefficient {
-            println!(
-                "submitted angular frequency coefficient: {:?}",
-                event.entity
-            );
-            inputs.angular_frequency_coefficient = event.value.clone();
         } else if event.entity == input_entities.phase {
             println!("submitted phase: {:?}", event.entity);
             inputs.phase = event.value.clone();
@@ -285,8 +252,6 @@ pub fn form_state_notifier_system(
         amplitude: form_state.amplitude.clone(),
         wave_length: form_state.wave_length.clone(),
         frequency: form_state.frequency.clone(),
-        k_coefficient: form_state.k_coefficient.clone(),
-        angular_frequency_coefficient: form_state.angular_frequency_coefficient.clone(),
         phase: form_state.phase.clone(),
     });
 }
@@ -300,8 +265,6 @@ pub fn listen_wave_gui_inputs(
     amplitude_query: Query<Entity, With<Amplitude>>,
     wave_length_query: Query<Entity, With<WaveLength>>,
     frequency_query: Query<Entity, With<Freq>>,
-    k_coefficient_query: Query<Entity, With<KCoefficient>>,
-    angular_frequency_coefficient_query: Query<Entity, With<AngularFrequencyCoefficient>>,
     phase_query: Query<Entity, With<Phase>>,
 ) {
     for input in events.read() {
@@ -324,20 +287,6 @@ pub fn listen_wave_gui_inputs(
             Ok(f) => {
                 despawn_all_entities(&mut commands, &frequency_query);
                 commands.spawn(Freq(Frequency::new::<hertz>(f)));
-            }
-            Err(err) => println!("error: {}", err),
-        }
-        match parse_float(&input.k_coefficient) {
-            Ok(f) => {
-                despawn_all_entities(&mut commands, &k_coefficient_query);
-                commands.spawn(KCoefficient(f));
-            }
-            Err(err) => println!("error: {}", err),
-        }
-        match parse_float(&input.angular_frequency_coefficient) {
-            Ok(f) => {
-                despawn_all_entities(&mut commands, &angular_frequency_coefficient_query);
-                commands.spawn(AngularFrequencyCoefficient(f));
             }
             Err(err) => println!("error: {}", err),
         }
@@ -395,12 +344,6 @@ pub struct WaveLength(pub Length);
 
 #[derive(Component, Debug, Clone, Copy)]
 pub struct Freq(pub Frequency);
-
-#[derive(Component, Debug, Clone, Copy)]
-pub struct KCoefficient(pub f32);
-
-#[derive(Component, Debug, Clone, Copy)]
-pub struct AngularFrequencyCoefficient(pub f32);
 
 #[derive(Component, Debug, Clone, Copy)]
 pub struct Phase(pub Angle);
