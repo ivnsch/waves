@@ -9,7 +9,7 @@ use uom::si::{
     angle::radian,
     f32::{Angle, Frequency, Length},
     frequency::hertz,
-    length::kilometer,
+    length::megameter,
 };
 
 #[derive(Resource)]
@@ -309,14 +309,14 @@ pub fn listen_gui_inputs(
         match parse_float(&input.amplitude) {
             Ok(f) => {
                 despawn_all_entities(&mut commands, &amplitude_query);
-                commands.spawn(Amplitude(Length::new::<kilometer>(f)));
+                commands.spawn(Amplitude(Length::new::<megameter>(f)));
             }
             Err(err) => println!("error: {}", err),
         }
         match parse_float(&input.wave_length) {
             Ok(f) => {
                 despawn_all_entities(&mut commands, &wave_length_query);
-                commands.spawn(WaveLength(Length::new::<kilometer>(f)));
+                commands.spawn(WaveLength(Length::new::<megameter>(f)));
             }
             Err(err) => println!("error: {}", err),
         }

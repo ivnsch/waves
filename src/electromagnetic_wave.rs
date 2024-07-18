@@ -4,7 +4,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
-use uom::si::{f32::Length, length::kilometer, time::second};
+use uom::si::{f32::Length, length::megameter, time::second};
 
 use crate::{
     curves_3d::draw_planar_fn_as_vert_vecs,
@@ -17,13 +17,13 @@ use crate::{
     },
 };
 
-// let's define the distance unit as 100000 km
-const SPEED_OF_LIGHT: f64 = 3.0; // 3 * 100000 km / s
+// unit implicitly defined as 1 megameter (1000 km)
+const SPEED_OF_LIGHT: f64 = 300.0; // 300 * 1000 km / s
 
 #[allow(dead_code)]
 pub fn add_electromagnetic_wave(app: &mut App) {
-    // this would be a wave length of 200000 km - not something that's typically dealt with, but looks good on the sim
-    let wave_length = 2.0;
+    let wave_length = 2.0; // 2 megameters
+
     // ensure c=fλ
     // note: for now *not* correcting new user inputs to speed of light
     let frequency = calculate_frequency(wave_length);
@@ -122,7 +122,7 @@ fn draw_electromagnetic_wave_internal(
     // let t = uom::si::f32::Time::new::<second>(0);  // not animated
 
     let function =
-        |x: f32| calculate_u(Length::new::<kilometer>(x), t, &user_pars).get::<kilometer>();
+        |x: f32| calculate_u(Length::new::<megameter>(x), t, &user_pars).get::<megameter>();
 
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, true, WHITE, function);
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, false, GREEN, function);
