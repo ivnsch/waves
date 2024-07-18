@@ -1,14 +1,15 @@
 use bevy::prelude::*;
 use uom::si::{
     angle::{radian, Angle},
-    f32::{Frequency, Length},
+    electric_field::volt_per_meter,
+    f32::{ElectricField, Frequency, Length},
     frequency::hertz,
     length::megameter,
 };
 
 use crate::wave_gui::{
-    despawn_all_entities, parse_float, Amplitude, AngularFrequencyCoefficient, Freq,
-    GuiInputsEvent, KCoefficient, Phase, WaveLength,
+    despawn_all_entities, parse_float, AngularFrequencyCoefficient, Freq, GuiInputsEvent,
+    KCoefficient, Phase, WaveLength,
 };
 
 pub fn setup_electromagnetic_wave_gui(commands: Commands, asset_server: Res<AssetServer>) {
@@ -67,7 +68,7 @@ fn generate_info_label(font: &Handle<Font>, label: &str, top: f32) -> TextBundle
 pub fn listen_electromagnetic_wave_gui_inputs(
     mut events: EventReader<GuiInputsEvent>,
     mut commands: Commands,
-    amplitude_query: Query<Entity, With<Amplitude>>,
+    amplitude_query: Query<Entity, With<ElectromagneticAmplitude>>,
     wave_length_query: Query<Entity, With<WaveLength>>,
     frequency_query: Query<Entity, With<Freq>>,
     k_coefficient_query: Query<Entity, With<KCoefficient>>,
@@ -79,7 +80,9 @@ pub fn listen_electromagnetic_wave_gui_inputs(
         match parse_float(&input.amplitude) {
             Ok(f) => {
                 despawn_all_entities(&mut commands, &amplitude_query);
-                commands.spawn(Amplitude(Length::new::<megameter>(f)));
+                commands.spawn(ElectromagneticAmplitude(
+                    ElectricField::new::<volt_per_meter>(f),
+                ));
             }
             Err(err) => println!("error: {}", err),
         }
@@ -120,3 +123,6 @@ pub fn listen_electromagnetic_wave_gui_inputs(
         }
     }
 }
+
+#[derive(Component, Debug, Clone, Copy)]
+pub struct ElectromagneticAmplitude(pub ElectricField);

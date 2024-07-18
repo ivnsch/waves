@@ -4,16 +4,22 @@ use bevy::{
     prelude::*,
 };
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
-use uom::si::{f32::Length, length::megameter, time::second};
+use uom::si::{
+    electric_field::volt_per_meter,
+    f32::{ElectricField, Length},
+    length::megameter,
+    time::second,
+};
 
 use crate::{
     curves_3d::draw_planar_fn_as_vert_vecs,
     electromagnetic_wave_gui::{
         listen_electromagnetic_wave_gui_inputs, setup_electromagnetic_wave_gui,
+        ElectromagneticAmplitude,
     },
-    wave::{calculate_u, UserParameters},
+    wave::{calculate_u_raw, RawUserParameters},
     wave_gui::{
-        focus, form_state_notifier_system, setup_wave_gui, text_listener, Amplitude,
+        focus, form_state_notifier_system, setup_wave_gui, text_listener,
         AngularFrequencyCoefficient, Freq, GuiInputs, GuiInputsEvent, KCoefficient, Phase,
         WaveLength,
     },
@@ -67,7 +73,7 @@ fn calculate_wave_length(frequency: f64) -> f64 {
 fn draw_electromagnetic_wave(
     gizmos: Gizmos,
     time: Res<Time>,
-    amplitude: Query<&Amplitude>,
+    amplitude: Query<&ElectromagneticAmplitude>,
     wave_length: Query<&WaveLength>,
     frequency: Query<&Freq>,
     k_coefficient: Query<&KCoefficient>,
@@ -102,14 +108,14 @@ fn draw_electromagnetic_wave(
 fn draw_electromagnetic_wave_internal(
     mut gizmos: Gizmos,
     time: Res<Time>,
-    amplitude: Query<&Amplitude>,
+    amplitude: Query<&ElectromagneticAmplitude>,
     wave_length: Query<&WaveLength>,
     frequency: Query<&Freq>,
     k_coefficient: Query<&KCoefficient>,
     angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
     phase: Query<&Phase>,
 ) -> Result<(), QuerySingleError> {
-    let user_pars = UserParameters {
+    let user_pars = ElectromagneticWaveUserParameters {
         amplitude: *amplitude.get_single()?,
         wave_length: *wave_length.get_single()?,
         frequency: *frequency.get_single()?,
@@ -124,10 +130,42 @@ fn draw_electromagnetic_wave_internal(
     // let t = uom::si::f32::Time::new::<second>(0);  // not animated
 
     let function =
-        |x: f32| calculate_u(Length::new::<megameter>(x), t, &user_pars).get::<megameter>();
+        |x: f32| calculate_u(Length::new::<megameter>(x), t, &user_pars).get::<volt_per_meter>();
 
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, true, WHITE, function);
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, false, GREEN, function);
 
     Ok(())
+}
+
+#[derive(Debug, Clone)]
+pub struct ElectromagneticWaveUserParameters {
+    pub amplitude: ElectromagneticAmplitude,
+    pub wave_length: WaveLength,
+    pub frequency: Freq,
+    pub k_coefficient: KCoefficient,
+    pub angular_frequency_coefficient: AngularFrequencyCoefficient,
+    pub phase: Phase,
+}
+
+impl From<ElectromagneticWaveUserParameters> for RawUserParameters {
+    fn from(p: ElectromagneticWaveUserParameters) -> Self {
+        RawUserParameters {
+            amplitude: p.amplitude.0.get::<volt_per_meter>(),
+            wave_length: p.wave_length,
+            frequency: p.frequency,
+            k_coefficient: p.k_coefficient,
+            angular_frequency_coefficient: p.angular_frequency_coefficient,
+            phase: p.phase,
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn calculate_u(
+    x: Length,
+    t: uom::si::f32::Time,
+    up: &ElectromagneticWaveUserParameters,
+) -> ElectricField {
+    ElectricField::new::<volt_per_meter>(calculate_u_raw(x, t, &up.clone().into()))
 }

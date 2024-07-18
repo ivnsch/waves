@@ -86,7 +86,7 @@ fn draw_wave_internal(
     angular_frequency_coefficient: Query<&AngularFrequencyCoefficient>,
     phase: Query<&Phase>,
 ) -> Result<(), QuerySingleError> {
-    let user_pars = UserParameters {
+    let user_pars = WaveUserParameters {
         amplitude: *amplitude.get_single()?,
         wave_length: *wave_length.get_single()?,
         frequency: *frequency.get_single()?,
@@ -108,8 +108,8 @@ fn draw_wave_internal(
     Ok(())
 }
 
-#[derive(Debug)]
-pub struct UserParameters {
+#[derive(Debug, Clone)]
+pub struct WaveUserParameters {
     pub amplitude: Amplitude,
     pub wave_length: WaveLength,
     pub frequency: Freq,
@@ -118,10 +118,40 @@ pub struct UserParameters {
     pub phase: Phase,
 }
 
+/// to reuse wave calculation for different domains (currently electromagnetic / non electromagnetic)
+/// not meant to be instantiated directly
+#[derive(Debug)]
+pub struct RawUserParameters {
+    pub amplitude: f32,
+    pub wave_length: WaveLength,
+    pub frequency: Freq,
+    pub k_coefficient: KCoefficient,
+    pub angular_frequency_coefficient: AngularFrequencyCoefficient,
+    pub phase: Phase,
+}
+
+impl From<WaveUserParameters> for RawUserParameters {
+    fn from(p: WaveUserParameters) -> Self {
+        RawUserParameters {
+            amplitude: p.amplitude.0.get::<kilometer>(),
+            wave_length: p.wave_length,
+            frequency: p.frequency,
+            k_coefficient: p.k_coefficient,
+            angular_frequency_coefficient: p.angular_frequency_coefficient,
+            phase: p.phase,
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn calculate_u(x: Length, t: uom::si::f32::Time, up: &WaveUserParameters) -> Length {
+    Length::new::<kilometer>(calculate_u_raw(x, t, &up.clone().into()))
+}
+
 /// equation of travelling wave: u(x,t)=Acos(kx−ωt)
 /// nice explanation https://physics.stackexchange.com/a/259007
 #[allow(clippy::too_many_arguments)]
-pub fn calculate_u(x: Length, t: uom::si::f32::Time, up: &UserParameters) -> Length {
+pub fn calculate_u_raw(x: Length, t: uom::si::f32::Time, up: &RawUserParameters) -> f32 {
     // wave cycles per unit distance
     // there might be reciprocal units on uom? (1/kilometer here), for now implicit
     let k = up.k_coefficient.0 * PI / up.wave_length.0.get::<kilometer>();
@@ -132,7 +162,7 @@ pub fn calculate_u(x: Length, t: uom::si::f32::Time, up: &UserParameters) -> Len
         + up.phase.0.get::<radian>())
     .cos();
 
-    Length::new::<kilometer>(up.amplitude.0.get::<kilometer>() * scalar)
+    up.amplitude * scalar
 }
 
 /// draws planar function as a sequence of vectors,
