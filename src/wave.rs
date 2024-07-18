@@ -9,7 +9,7 @@ use bevy::{ecs::query::QuerySingleError, prelude::*};
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
 use uom::si::{
     angle::radian,
-    f32::Length,
+    f32::{Frequency, Length},
     frequency::hertz,
     length::{kilometer, megameter},
     time::second,
@@ -152,17 +152,35 @@ pub fn calculate_u(x: Length, t: uom::si::f32::Time, up: &WaveUserParameters) ->
 /// nice explanation https://physics.stackexchange.com/a/259007
 #[allow(clippy::too_many_arguments)]
 pub fn calculate_u_raw(x: Length, t: uom::si::f32::Time, up: &RawUserParameters) -> f32 {
+    let screen_speed_pars = to_screen_speed(&up);
     // wave cycles per unit distance
     // there might be reciprocal units on uom? (1/kilometer here), for now implicit
-    let k = up.k_coefficient.0 * PI / up.wave_length.0.get::<kilometer>();
+    let k = up.k_coefficient.0 * PI / screen_speed_pars.wave_length.get::<kilometer>();
 
-    let angular_frequency = up.angular_frequency_coefficient.0 * PI * up.frequency.0.get::<hertz>();
+    let angular_frequency =
+        up.angular_frequency_coefficient.0 * PI * screen_speed_pars.frequency.get::<hertz>();
 
     let scalar = ((k * x.get::<kilometer>()) - (angular_frequency * t.get::<second>())
         + up.phase.0.get::<radian>())
     .cos();
 
     up.amplitude * scalar
+}
+
+#[derive(Debug)]
+struct ScreenSpeedParameters {
+    wave_length: Length,
+    frequency: Frequency,
+}
+
+/// slow down for animation
+fn to_screen_speed(up: &RawUserParameters) -> ScreenSpeedParameters {
+    let speed_factor = 0.1;
+    // v = fλ -> v * factor = (fλ) * factor
+    ScreenSpeedParameters {
+        wave_length: up.wave_length.0 * speed_factor,
+        frequency: up.frequency.0 * speed_factor,
+    }
 }
 
 /// draws planar function as a sequence of vectors,
