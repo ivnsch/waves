@@ -8,12 +8,14 @@ use uom::si::{f32::Length, length::megameter, time::second};
 
 use crate::{
     curves_3d::draw_planar_fn_as_vert_vecs,
-    electromagnetic_wave_gui::setup_electromagnetic_wave_gui,
+    electromagnetic_wave_gui::{
+        listen_electromagnetic_wave_gui_inputs, setup_electromagnetic_wave_gui,
+    },
     wave::{calculate_u, UserParameters},
     wave_gui::{
-        focus, form_state_notifier_system, listen_gui_inputs, setup_wave_gui, text_listener,
-        Amplitude, AngularFrequencyCoefficient, Freq, GuiInputs, GuiInputsEvent, KCoefficient,
-        Phase, WaveLength,
+        focus, form_state_notifier_system, setup_wave_gui, text_listener, Amplitude,
+        AngularFrequencyCoefficient, Freq, GuiInputs, GuiInputsEvent, KCoefficient, Phase,
+        WaveLength,
     },
 };
 
@@ -43,7 +45,7 @@ pub fn add_electromagnetic_wave(app: &mut App) {
             Update,
             (
                 draw_electromagnetic_wave,
-                listen_gui_inputs,
+                listen_electromagnetic_wave_gui_inputs,
                 text_listener,
                 form_state_notifier_system,
             ),

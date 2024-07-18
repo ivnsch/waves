@@ -1,8 +1,9 @@
 use std::f32::consts::PI;
 
 use crate::wave_gui::{
-    focus, form_state_notifier_system, listen_gui_inputs, setup_wave_gui, text_listener, Amplitude,
-    AngularFrequencyCoefficient, Freq, GuiInputs, GuiInputsEvent, KCoefficient, Phase, WaveLength,
+    focus, form_state_notifier_system, listen_wave_gui_inputs, setup_wave_gui, text_listener,
+    Amplitude, AngularFrequencyCoefficient, Freq, GuiInputs, GuiInputsEvent, KCoefficient, Phase,
+    WaveLength,
 };
 use bevy::{ecs::query::QuerySingleError, prelude::*};
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
@@ -32,7 +33,7 @@ pub fn add_wave_2d_system(app: &mut App) {
             Update,
             (
                 draw_wave,
-                listen_gui_inputs,
+                listen_wave_gui_inputs,
                 text_listener,
                 form_state_notifier_system,
             ),

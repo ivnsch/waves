@@ -294,7 +294,7 @@ pub fn form_state_notifier_system(
 /// processes the gui events
 // TODO error handling (show on ui)
 #[allow(clippy::too_many_arguments)]
-pub fn listen_gui_inputs(
+pub fn listen_wave_gui_inputs(
     mut events: EventReader<GuiInputsEvent>,
     mut commands: Commands,
     amplitude_query: Query<Entity, With<Amplitude>>,
@@ -351,7 +351,7 @@ pub fn listen_gui_inputs(
     }
 }
 
-fn parse_float(str: &str) -> Result<f32, String> {
+pub fn parse_float(str: &str) -> Result<f32, String> {
     let f = str.parse::<f32>();
     match f {
         Ok(f) => Ok(f),
@@ -359,7 +359,7 @@ fn parse_float(str: &str) -> Result<f32, String> {
     }
 }
 
-fn despawn_all_entities<T>(commands: &mut Commands, query: &Query<Entity, With<T>>)
+pub fn despawn_all_entities<T>(commands: &mut Commands, query: &Query<Entity, With<T>>)
 where
     T: Component,
 {
