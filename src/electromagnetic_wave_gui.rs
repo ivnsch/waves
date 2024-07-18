@@ -4,7 +4,7 @@ use uom::si::{
     electric_field::volt_per_meter,
     f32::{ElectricField, Frequency, Length},
     frequency::hertz,
-    length::megameter,
+    length::meter,
 };
 
 use crate::wave_gui::{
@@ -89,7 +89,7 @@ pub fn listen_electromagnetic_wave_gui_inputs(
         match parse_float(&input.wave_length) {
             Ok(f) => {
                 despawn_all_entities(&mut commands, &wave_length_query);
-                commands.spawn(WaveLength(Length::new::<megameter>(f)));
+                commands.spawn(WaveLength(Length::new::<meter>(f)));
             }
             Err(err) => println!("error: {}", err),
         }

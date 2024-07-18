@@ -7,7 +7,7 @@ use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
 use uom::si::{
     electric_field::volt_per_meter,
     f32::{ElectricField, Length},
-    length::megameter,
+    length::meter,
     time::second,
 };
 
@@ -25,12 +25,11 @@ use crate::{
     },
 };
 
-// unit implicitly defined as 1 megameter (1000 km)
-const SPEED_OF_LIGHT: f64 = 300.0; // 300 * 1000 km / s
+const SPEED_OF_LIGHT: f64 = 299_792_458.0; // m / s
 
 #[allow(dead_code)]
 pub fn add_electromagnetic_wave(app: &mut App) {
-    let wave_length = 2.0; // 2 megameters
+    let wave_length = 1.0; // 1 meter
 
     // ensure c=fλ
     // note: for now *not* correcting new user inputs to speed of light
@@ -130,7 +129,7 @@ fn draw_electromagnetic_wave_internal(
     // let t = uom::si::f32::Time::new::<second>(0);  // not animated
 
     let function =
-        |x: f32| calculate_u(Length::new::<megameter>(x), t, &user_pars).get::<volt_per_meter>();
+        |x: f32| calculate_u(Length::new::<meter>(x), t, &user_pars).get::<volt_per_meter>();
 
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, true, WHITE, function);
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, false, GREEN, function);

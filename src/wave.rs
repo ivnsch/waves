@@ -11,7 +11,7 @@ use uom::si::{
     angle::radian,
     f32::{Frequency, Length},
     frequency::hertz,
-    length::{kilometer, megameter},
+    length::meter,
     time::second,
 };
 
@@ -100,8 +100,7 @@ fn draw_wave_internal(
     let t = uom::si::f32::Time::new::<second>(time.elapsed_seconds());
     // let t = uom::si::f32::Time::new::<second>(0);  // not animated
 
-    let function =
-        |x: f32| calculate_u(Length::new::<megameter>(x), t, &user_pars).get::<megameter>();
+    let function = |x: f32| calculate_u(Length::new::<meter>(x), t, &user_pars).get::<meter>();
 
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, Color::WHITE, function);
 
@@ -133,7 +132,7 @@ pub struct RawUserParameters {
 impl From<WaveUserParameters> for RawUserParameters {
     fn from(p: WaveUserParameters) -> Self {
         RawUserParameters {
-            amplitude: p.amplitude.0.get::<kilometer>(),
+            amplitude: p.amplitude.0.get::<meter>(),
             wave_length: p.wave_length,
             frequency: p.frequency,
             k_coefficient: p.k_coefficient,
@@ -145,7 +144,7 @@ impl From<WaveUserParameters> for RawUserParameters {
 
 #[allow(clippy::too_many_arguments)]
 pub fn calculate_u(x: Length, t: uom::si::f32::Time, up: &WaveUserParameters) -> Length {
-    Length::new::<kilometer>(calculate_u_raw(x, t, &up.clone().into()))
+    Length::new::<meter>(calculate_u_raw(x, t, &up.clone().into()))
 }
 
 /// equation of travelling wave: u(x,t)=Acos(kx−ωt)
@@ -153,14 +152,16 @@ pub fn calculate_u(x: Length, t: uom::si::f32::Time, up: &WaveUserParameters) ->
 #[allow(clippy::too_many_arguments)]
 pub fn calculate_u_raw(x: Length, t: uom::si::f32::Time, up: &RawUserParameters) -> f32 {
     let screen_speed_pars = to_screen_speed(&up);
+    // println!("screen_speed_pars: {:?}", screen_speed_pars);
+
     // wave cycles per unit distance
-    // there might be reciprocal units on uom? (1/kilometer here), for now implicit
-    let k = up.k_coefficient.0 * PI / screen_speed_pars.wave_length.get::<kilometer>();
+    // there might be reciprocal units on uom? (1/meter here), for now implicit
+    let k = up.k_coefficient.0 * PI / screen_speed_pars.wave_length.get::<meter>();
 
     let angular_frequency =
         up.angular_frequency_coefficient.0 * PI * screen_speed_pars.frequency.get::<hertz>();
 
-    let scalar = ((k * x.get::<kilometer>()) - (angular_frequency * t.get::<second>())
+    let scalar = ((k * x.get::<meter>()) - (angular_frequency * t.get::<second>())
         + up.phase.0.get::<radian>())
     .cos();
 
@@ -175,10 +176,14 @@ struct ScreenSpeedParameters {
 
 /// slow down for animation
 fn to_screen_speed(up: &RawUserParameters) -> ScreenSpeedParameters {
-    let speed_factor = 0.1;
+    let speed_factor: f32 = 0.00000001;
     // v = fλ -> v * factor = (fλ) * factor
     ScreenSpeedParameters {
-        wave_length: up.wave_length.0 * speed_factor,
+        // actually, scale down only frequency,
+        // scaling down distance here will give very small decimals, which can't be rendered properly
+        // there's probably a better solution for this (scaling the coordinate space perhaps), but this seems fine for now
+        // wave_length: up.wave_length.0 * speed_factor,
+        wave_length: up.wave_length.0,
         frequency: up.frequency.0 * speed_factor,
     }
 }
