@@ -1,5 +1,5 @@
 use bevy::{
-    color::palettes::css::{BLUE, GRAY},
+    color::palettes::css::{BLUE, GRAY, RED},
     prelude::*,
 };
 use bevy_simple_text_input::{
@@ -46,6 +46,8 @@ pub struct WaveLengthInputMarker;
 pub struct FrequencyInputMarker;
 #[derive(Component, Default)]
 pub struct PhaseMarker;
+#[derive(Component, Default)]
+pub struct WarningMarker;
 
 pub fn setup_wave_gui(
     mut commands: Commands,
@@ -102,6 +104,8 @@ pub fn setup_wave_gui(
         PhaseMarker,
         form_state.phase.clone(),
     );
+
+    add_warning_label(&mut commands, root_id, &font);
 
     commands.insert_resource(GuiInputEntities {
         amplitude: amplitude_input,
@@ -176,6 +180,37 @@ fn generate_input_wrapper() -> NodeBundle {
             },
             ..default()
         },
+        ..default()
+    }
+}
+
+/// adds a warning label under whatever fields have been added so far to right column
+pub fn add_warning_label(commands: &mut Commands, root_id: Entity, font: &Handle<Font>) {
+    let warning_label = generate_warning_label(&font);
+    let warning_spawned_label = commands.spawn((WarningMarker, warning_label)).id();
+    commands
+        .entity(root_id)
+        .push_children(&[warning_spawned_label]);
+}
+
+fn generate_warning_label(font: &Handle<Font>) -> TextBundle {
+    TextBundle {
+        style: Style {
+            position_type: PositionType::Relative,
+            top: Val::Px(0.0),
+            left: Val::Px(0.0),
+            width: Val::Percent(100.0),
+            height: Val::Auto,
+            ..default()
+        },
+        text: Text::from_section(
+            "".to_string(),
+            TextStyle {
+                font: font.clone(),
+                font_size: 12.0,
+                color: RED.into(),
+            },
+        ),
         ..default()
     }
 }

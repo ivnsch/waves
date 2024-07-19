@@ -6,9 +6,10 @@ use bevy::{
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
 use uom::si::{
     electric_field::volt_per_meter,
-    f32::{ElectricField, Length},
+    f32::{ElectricField, Length, Velocity},
     length::meter,
     time::second,
+    velocity::meter_per_second,
 };
 
 use crate::{
@@ -20,7 +21,7 @@ use crate::{
     wave::{calculate_u_raw, RawUserParameters},
     wave_gui::{
         focus, form_state_notifier_system, text_listener, Freq, GuiInputs, GuiInputsEvent, Phase,
-        WaveLength,
+        WarningMarker, WaveLength,
     },
 };
 
@@ -50,6 +51,7 @@ pub fn add_electromagnetic_wave(app: &mut App) {
                 listen_electromagnetic_wave_gui_inputs,
                 text_listener,
                 form_state_notifier_system,
+                validate_inputs,
             ),
         )
         .add_systems(Startup, setup_electromagnetic_wave_infos)
@@ -63,6 +65,64 @@ fn calculate_frequency(wave_length: f64) -> f64 {
 #[allow(dead_code)]
 fn calculate_wave_length(frequency: f64) -> f64 {
     SPEED_OF_LIGHT / frequency
+}
+
+fn validate_inputs(
+    frequency: Query<&Freq>,
+    wave_length: Query<&WaveLength>,
+    warning_query: Query<&mut Text, With<WarningMarker>>,
+) {
+    match validate_inputs_internal(frequency, wave_length, warning_query) {
+        Ok(_) => {}
+        Err(e) => match e {
+            QuerySingleError::NoEntities(s) => {
+                info!("No entity added yet: {}", s)
+            }
+            QuerySingleError::MultipleEntities(s) => {
+                error!("Found multiple entities of a type: {}", s)
+            }
+        },
+    }
+}
+
+fn validate_inputs_internal(
+    frequency: Query<&Freq>,
+    wave_length: Query<&WaveLength>,
+    mut warning_query: Query<&mut Text, With<WarningMarker>>,
+) -> Result<(), QuerySingleError> {
+    let wave_length = wave_length.get_single()?;
+    let frequency = frequency.get_single()?;
+
+    let speed = frequency.0 * wave_length.0;
+
+    let speed_of_light = Velocity::new::<meter_per_second>(299_792_458.0);
+    let factor = speed / speed_of_light;
+
+    let factor_number = factor.value;
+    let speed_number = speed.get::<meter_per_second>();
+
+    let warning = if speed != speed_of_light {
+        Some(format!(
+            "{}x speed of light, speed: {} m/s",
+            factor_number, speed_number
+        ))
+    } else {
+        None
+    };
+
+    let mut warning_label: Mut<Text> = warning_query.get_single_mut()?;
+    match warning {
+        Some(warning) => {
+            warning_label.sections[0].value = warning.to_string();
+        }
+        None => {
+            if !warning_label.sections[0].value.is_empty() {
+                warning_label.sections[0].value = "".to_string();
+            }
+        }
+    }
+
+    Ok(())
 }
 
 #[allow(clippy::too_many_arguments)]

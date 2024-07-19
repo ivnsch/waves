@@ -8,8 +8,8 @@ use uom::si::{
 };
 
 use crate::wave_gui::{
-    despawn_all_entities, generate_input_box, parse_float, AmplitudeInputMarker, Freq,
-    FrequencyInputMarker, GuiInputEntities, GuiInputs, GuiInputsEvent, Phase, PhaseMarker,
+    add_warning_label, despawn_all_entities, generate_input_box, parse_float, AmplitudeInputMarker,
+    Freq, FrequencyInputMarker, GuiInputEntities, GuiInputs, GuiInputsEvent, Phase, PhaseMarker,
     WaveLength, WaveLengthInputMarker,
 };
 
@@ -68,6 +68,8 @@ pub fn setup_electromagnetic_wave_gui(
         PhaseMarker,
         form_state.phase.clone(),
     );
+
+    add_warning_label(&mut commands, root_id, &font);
 
     commands.insert_resource(GuiInputEntities {
         amplitude: amplitude_input,
