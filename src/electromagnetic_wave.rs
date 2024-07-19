@@ -4,9 +4,11 @@ use bevy::{
     prelude::*,
 };
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
+use once_cell::sync::Lazy;
 use uom::si::{
     electric_field::volt_per_meter,
-    f32::{ElectricField, Length, Velocity},
+    f32::{ElectricField, Frequency, Length, Velocity},
+    frequency::hertz,
     length::meter,
     time::second,
     velocity::meter_per_second,
@@ -25,11 +27,12 @@ use crate::{
     },
 };
 
-const SPEED_OF_LIGHT: f64 = 299_792_458.0; // m / s
+static SPEED_OF_LIGHT: Lazy<Velocity> =
+    Lazy::new(|| Velocity::new::<meter_per_second>(299_792_458.0));
 
 #[allow(dead_code)]
 pub fn add_electromagnetic_wave(app: &mut App) {
-    let wave_length = 1.0; // 1 meter
+    let wave_length = Length::new::<meter>(1.0);
 
     // ensure c=fλ
     // note: for now *not* correcting new user inputs to speed of light
@@ -39,8 +42,8 @@ pub fn add_electromagnetic_wave(app: &mut App) {
         .add_plugins(TextInputPlugin)
         .insert_resource(GuiInputs {
             amplitude: "1".to_owned(),
-            wave_length: wave_length.to_string(),
-            frequency: frequency.to_string(),
+            wave_length: wave_length.get::<meter>().to_string(),
+            frequency: frequency.get::<hertz>().to_string(),
             phase: "0".to_owned(),
         })
         .add_systems(Update, focus.before(TextInputSystem))
@@ -58,13 +61,13 @@ pub fn add_electromagnetic_wave(app: &mut App) {
         .add_systems(Startup, setup_electromagnetic_wave_gui);
 }
 
-fn calculate_frequency(wave_length: f64) -> f64 {
-    SPEED_OF_LIGHT / wave_length
+fn calculate_frequency(wave_length: Length) -> Frequency {
+    *SPEED_OF_LIGHT / wave_length
 }
 
 #[allow(dead_code)]
-fn calculate_wave_length(frequency: f64) -> f64 {
-    SPEED_OF_LIGHT / frequency
+fn calculate_wave_length(frequency: Frequency) -> Length {
+    *SPEED_OF_LIGHT / frequency
 }
 
 fn validate_inputs(
@@ -95,13 +98,12 @@ fn validate_inputs_internal(
 
     let speed = frequency.0 * wave_length.0;
 
-    let speed_of_light = Velocity::new::<meter_per_second>(299_792_458.0);
-    let factor = speed / speed_of_light;
+    let factor = speed / *SPEED_OF_LIGHT;
 
     let factor_number = factor.value;
     let speed_number = speed.get::<meter_per_second>();
 
-    let warning = if speed != speed_of_light {
+    let warning = if speed != *SPEED_OF_LIGHT {
         Some(format!(
             "{}x speed of light, speed: {} m/s",
             factor_number, speed_number

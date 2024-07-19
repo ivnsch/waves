@@ -3353,6 +3353,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_simple_text_input",
+ "once_cell",
  "uom",
 ]
 
