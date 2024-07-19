@@ -45,10 +45,6 @@ pub struct WaveLengthInputMarker;
 #[derive(Component, Default)]
 pub struct FrequencyInputMarker;
 #[derive(Component, Default)]
-pub struct KCoefficientMarker;
-#[derive(Component, Default)]
-pub struct AngularCoefficientMarker;
-#[derive(Component, Default)]
 pub struct PhaseMarker;
 
 pub fn setup_wave_gui(
