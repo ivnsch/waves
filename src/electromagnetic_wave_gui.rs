@@ -9,7 +9,7 @@ use uom::si::{
 
 use crate::wave_gui::{despawn_all_entities, parse_float, Freq, GuiInputsEvent, Phase, WaveLength};
 
-pub fn setup_electromagnetic_wave_gui(commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup_electromagnetic_wave_infos(commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/FiraMono-Medium.ttf");
 
     add_info_labels(commands, &font);

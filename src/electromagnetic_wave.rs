@@ -14,7 +14,7 @@ use uom::si::{
 use crate::{
     curves_3d::draw_planar_fn_as_vert_vecs,
     electromagnetic_wave_gui::{
-        listen_electromagnetic_wave_gui_inputs, setup_electromagnetic_wave_gui,
+        listen_electromagnetic_wave_gui_inputs, setup_electromagnetic_wave_infos,
         ElectromagneticAmplitude,
     },
     wave::{calculate_u_raw, RawUserParameters},
@@ -52,7 +52,7 @@ pub fn add_electromagnetic_wave(app: &mut App) {
                 form_state_notifier_system,
             ),
         )
-        .add_systems(Startup, setup_electromagnetic_wave_gui)
+        .add_systems(Startup, setup_electromagnetic_wave_infos)
         .add_systems(Startup, setup_wave_gui);
 }
 
