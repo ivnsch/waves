@@ -127,7 +127,7 @@ pub fn calculate_u(x: Length, t: uom::si::f32::Time, up: &WaveUserParameters) ->
 /// nice explanation https://physics.stackexchange.com/a/259007
 #[allow(clippy::too_many_arguments)]
 pub fn calculate_u_raw(x: Length, t: uom::si::f32::Time, up: &RawUserParameters) -> f32 {
-    let screen_speed_pars = to_screen_speed(&up);
+    let screen_speed_pars = to_screen_speed(up);
     // println!("screen_speed_pars: {:?}", screen_speed_pars);
 
     // wave cycles per unit distance

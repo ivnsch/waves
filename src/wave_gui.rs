@@ -186,7 +186,7 @@ fn generate_input_wrapper() -> NodeBundle {
 
 /// adds a warning label under whatever fields have been added so far to right column
 pub fn add_warning_label(commands: &mut Commands, root_id: Entity, font: &Handle<Font>) {
-    let warning_label = generate_warning_label(&font);
+    let warning_label = generate_warning_label(font);
     let warning_spawned_label = commands.spawn((WarningMarker, warning_label)).id();
     commands
         .entity(root_id)
