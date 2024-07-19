@@ -7,7 +7,75 @@ use uom::si::{
     length::meter,
 };
 
-use crate::wave_gui::{despawn_all_entities, parse_float, Freq, GuiInputsEvent, Phase, WaveLength};
+use crate::wave_gui::{
+    despawn_all_entities, generate_input_box, parse_float, AmplitudeInputMarker, Freq,
+    FrequencyInputMarker, GuiInputEntities, GuiInputs, GuiInputsEvent, Phase, PhaseMarker,
+    WaveLength, WaveLengthInputMarker,
+};
+
+pub fn setup_electromagnetic_wave_gui(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    form_state: Res<GuiInputs>,
+) {
+    let font = asset_server.load("fonts/FiraMono-Medium.ttf");
+
+    let root = commands.spawn(NodeBundle {
+        style: Style {
+            position_type: PositionType::Absolute,
+            flex_direction: FlexDirection::Column,
+            top: Val::Px(0.0),
+            right: Val::Px(0.0),
+            width: Val::Px(130.0),
+            height: Val::Percent(100.0),
+            ..default()
+        },
+        background_color: BackgroundColor(Color::BLACK),
+        ..default()
+    });
+
+    let root_id = root.id();
+
+    let amplitude_input = generate_input_box(
+        &font,
+        root_id,
+        &mut commands,
+        "Amplitude (volt/s)",
+        AmplitudeInputMarker,
+        form_state.amplitude.clone(),
+    );
+    let wave_length_input = generate_input_box(
+        &font,
+        root_id,
+        &mut commands,
+        "Wave length (m)",
+        WaveLengthInputMarker,
+        form_state.wave_length.clone(),
+    );
+    let frequency_input = generate_input_box(
+        &font,
+        root_id,
+        &mut commands,
+        "Frequency (hz)",
+        FrequencyInputMarker,
+        form_state.frequency.clone(),
+    );
+    let phase_input = generate_input_box(
+        &font,
+        root_id,
+        &mut commands,
+        "Phase (rad)",
+        PhaseMarker,
+        form_state.phase.clone(),
+    );
+
+    commands.insert_resource(GuiInputEntities {
+        amplitude: amplitude_input,
+        wave_length: wave_length_input,
+        frequency: frequency_input,
+        phase: phase_input,
+    });
+}
 
 pub fn setup_electromagnetic_wave_infos(commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/FiraMono-Medium.ttf");

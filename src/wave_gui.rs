@@ -64,7 +64,7 @@ pub fn setup_wave_gui(
             flex_direction: FlexDirection::Column,
             top: Val::Px(0.0),
             right: Val::Px(0.0),
-            width: Val::Px(100.0),
+            width: Val::Px(130.0),
             height: Val::Percent(100.0),
             ..default()
         },
@@ -78,7 +78,7 @@ pub fn setup_wave_gui(
         &font,
         root_id,
         &mut commands,
-        "Amplitude",
+        "Amplitude (m)",
         AmplitudeInputMarker,
         form_state.amplitude.clone(),
     );
@@ -86,7 +86,7 @@ pub fn setup_wave_gui(
         &font,
         root_id,
         &mut commands,
-        "Wave length",
+        "Wave length (m)",
         WaveLengthInputMarker,
         form_state.wave_length.clone(),
     );
@@ -94,7 +94,7 @@ pub fn setup_wave_gui(
         &font,
         root_id,
         &mut commands,
-        "Frequency",
+        "Frequency (hz)",
         FrequencyInputMarker,
         form_state.frequency.clone(),
     );
@@ -102,7 +102,7 @@ pub fn setup_wave_gui(
         &font,
         root_id,
         &mut commands,
-        "Phase",
+        "Phase (rad)",
         PhaseMarker,
         form_state.phase.clone(),
     );
@@ -115,7 +115,7 @@ pub fn setup_wave_gui(
     });
 }
 
-fn generate_input_box<T>(
+pub fn generate_input_box<T>(
     font: &Handle<Font>,
     root_id: Entity,
     commands: &mut Commands,

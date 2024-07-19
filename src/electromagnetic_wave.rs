@@ -14,13 +14,13 @@ use uom::si::{
 use crate::{
     curves_3d::draw_planar_fn_as_vert_vecs,
     electromagnetic_wave_gui::{
-        listen_electromagnetic_wave_gui_inputs, setup_electromagnetic_wave_infos,
-        ElectromagneticAmplitude,
+        listen_electromagnetic_wave_gui_inputs, setup_electromagnetic_wave_gui,
+        setup_electromagnetic_wave_infos, ElectromagneticAmplitude,
     },
     wave::{calculate_u_raw, RawUserParameters},
     wave_gui::{
-        focus, form_state_notifier_system, setup_wave_gui, text_listener, Freq, GuiInputs,
-        GuiInputsEvent, Phase, WaveLength,
+        focus, form_state_notifier_system, text_listener, Freq, GuiInputs, GuiInputsEvent, Phase,
+        WaveLength,
     },
 };
 
@@ -53,7 +53,7 @@ pub fn add_electromagnetic_wave(app: &mut App) {
             ),
         )
         .add_systems(Startup, setup_electromagnetic_wave_infos)
-        .add_systems(Startup, setup_wave_gui);
+        .add_systems(Startup, setup_electromagnetic_wave_gui);
 }
 
 fn calculate_frequency(wave_length: f64) -> f64 {
