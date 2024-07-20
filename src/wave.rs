@@ -4,7 +4,7 @@ use crate::wave_gui::{
     focus, form_state_notifier_system, listen_wave_gui_inputs, setup_wave_gui, text_listener,
     Amplitude, Freq, GuiInputs, GuiInputsEvent, Phase, WaveLength,
 };
-use bevy::{ecs::query::QuerySingleError, prelude::*};
+use bevy::{color::palettes::css::WHITE, ecs::query::QuerySingleError, prelude::*};
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
 use uom::si::{
     angle::radian,
@@ -82,9 +82,12 @@ fn draw_wave_internal(
     let t = uom::si::f32::Time::new::<second>(time.elapsed_seconds());
     // let t = uom::si::f32::Time::new::<second>(0);  // not animated
 
-    let function = |x: f32| calculate_u(Length::new::<meter>(x), t, &user_pars).get::<meter>();
+    let function = |x: f32| {
+        let vec3 = calculate_u(Length::new::<meter>(x), t, &user_pars, Vec3::Y).to_vec3();
+        Vec2::new(vec3.x, vec3.y)
+    };
 
-    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, Color::WHITE, function);
+    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, WHITE, function);
 
     Ok(())
 }
@@ -119,14 +122,49 @@ impl From<WaveUserParameters> for RawUserParameters {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn calculate_u(x: Length, t: uom::si::f32::Time, up: &WaveUserParameters) -> Length {
-    Length::new::<meter>(calculate_u_raw(x, t, &up.clone().into()))
+pub fn calculate_u(
+    x: Length,
+    t: uom::si::f32::Time,
+    up: &WaveUserParameters,
+    direction: Vec3,
+) -> LengthVec3 {
+    let raw = calculate_u_raw(x, t, &up.clone().into(), direction);
+    // assumption: raw amplitude passed to calculate_u_raw (RawUserParameters) was in meter
+    LengthVec3 {
+        x: Length::new::<meter>(raw.x),
+        y: Length::new::<meter>(raw.y),
+        z: Length::new::<meter>(raw.z),
+    }
+}
+
+#[derive(Debug)]
+pub struct LengthVec3 {
+    pub x: Length,
+    pub y: Length,
+    pub z: Length,
+}
+
+/// f32 vec
+impl LengthVec3 {
+    fn to_vec3(self) -> Vec3 {
+        Vec3::new(
+            self.x.get::<meter>(),
+            self.y.get::<meter>(),
+            self.z.get::<meter>(),
+        )
+    }
 }
 
 /// equation of travelling wave: u(x,t)=Acos(kx−ωt)
 /// nice explanation https://physics.stackexchange.com/a/259007
+/// returns a unit-less vector to be shared between electromagnetic and non electromagnetic wave
 #[allow(clippy::too_many_arguments)]
-pub fn calculate_u_raw(x: Length, t: uom::si::f32::Time, up: &RawUserParameters) -> f32 {
+pub fn calculate_u_raw(
+    x: Length,
+    t: uom::si::f32::Time,
+    up: &RawUserParameters,
+    unit_vector: Vec3,
+) -> Vec3 {
     let screen_speed_pars = to_screen_speed(up);
     // println!("screen_speed_pars: {:?}", screen_speed_pars);
 
@@ -140,7 +178,7 @@ pub fn calculate_u_raw(x: Length, t: uom::si::f32::Time, up: &RawUserParameters)
         + up.phase.0.get::<radian>())
     .cos();
 
-    up.amplitude * scalar
+    unit_vector * (up.amplitude * scalar)
 }
 
 #[derive(Debug)]
@@ -163,37 +201,37 @@ fn to_screen_speed(up: &RawUserParameters) -> ScreenSpeedParameters {
     }
 }
 
-/// draws planar function as a sequence of vectors,
-fn draw_planar_fn_as_vert_vecs<F>(
+// /// draws planar function as a sequence o/ }
+
+/// draws planar function as a sequence of vectors
+pub fn draw_planar_fn_as_vert_vecs<F>(
     gizmos: &mut Gizmos,
     range_start: i32,
     range_end: i32,
-    color: Color,
+    color: Srgba,
     function: F,
 ) where
-    F: Fn(f32) -> f32,
+    F: Fn(f32) -> Vec2,
 {
-    let scaling = 50.0;
-    let x_scaling = scaling;
-    let y_scaling = scaling;
-
-    let mut last_point = None;
+    let x_scaling = 50.0;
+    let y_scaling = 50.0;
 
     let mut value = range_start as f32;
     while value < range_end as f32 {
         let x = value;
-        let y = function(x);
+        let vec = function(x);
 
-        if let Some((last_x, last_y)) = last_point {
-            vert_x_arrow_out(last_x * x_scaling, last_y * y_scaling, gizmos, color);
-            vert_x_arrow_out(x * x_scaling, y * y_scaling, gizmos, color);
-        }
+        let scaled_x = x * x_scaling;
+        let scaled_y = vec.y * y_scaling;
 
-        last_point = Some((x, y));
+        println!("x: {}, y: {}", scaled_x, scaled_y);
+
+        gizmos.line_2d(
+            Vec2::new(scaled_x, 0.0),
+            Vec2::new(scaled_x, scaled_y),
+            color,
+        );
+
         value += 0.1;
     }
-}
-
-fn vert_x_arrow_out(x: f32, y: f32, gizmos: &mut Gizmos, color: Color) {
-    gizmos.line_2d(Vec2::new(x, 0.0), Vec2::new(x, y), color);
 }

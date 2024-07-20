@@ -173,11 +173,15 @@ fn draw_electromagnetic_wave_internal(
     let t = uom::si::f32::Time::new::<second>(time.elapsed_seconds());
     // let t = uom::si::f32::Time::new::<second>(0);  // not animated
 
-    let function =
-        |x: f32| calculate_u(Length::new::<meter>(x), t, &user_pars).get::<volt_per_meter>();
+    // electric
+    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, WHITE, |x: f32| {
+        calculate_u(Length::new::<meter>(x), t, &user_pars, Vec3::Z).to_vec3()
+    });
 
-    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, true, WHITE, function);
-    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, false, GREEN, function);
+    // magnetic
+    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, GREEN, |x: f32| {
+        calculate_u(Length::new::<meter>(x), t, &user_pars, Vec3::Y).to_vec3()
+    });
 
     Ok(())
 }
@@ -206,6 +210,31 @@ fn calculate_u(
     x: Length,
     t: uom::si::f32::Time,
     up: &ElectromagneticWaveUserParameters,
-) -> ElectricField {
-    ElectricField::new::<volt_per_meter>(calculate_u_raw(x, t, &up.clone().into()))
+    direction: Vec3,
+) -> ElectricFieldVec3 {
+    let raw = calculate_u_raw(x, t, &up.clone().into(), direction);
+    // assumption: raw amplitude passed to calculate_u_raw (RawUserParameters) was in volt_per_meter
+    ElectricFieldVec3 {
+        x: ElectricField::new::<volt_per_meter>(raw.x),
+        y: ElectricField::new::<volt_per_meter>(raw.y),
+        z: ElectricField::new::<volt_per_meter>(raw.z),
+    }
+}
+
+#[derive(Debug)]
+pub struct ElectricFieldVec3 {
+    pub x: ElectricField,
+    pub y: ElectricField,
+    pub z: ElectricField,
+}
+
+/// f32 vec
+impl ElectricFieldVec3 {
+    fn to_vec3(self) -> Vec3 {
+        Vec3::new(
+            self.x.get::<volt_per_meter>(),
+            self.y.get::<volt_per_meter>(),
+            self.z.get::<volt_per_meter>(),
+        )
+    }
 }

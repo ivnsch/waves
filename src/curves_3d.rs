@@ -23,23 +23,25 @@ fn draw_sin_fn(mut gizmos: Gizmos, _time: Res<Time>) {
 #[allow(dead_code)]
 fn draw_sin_as_vert_vecs(mut gizmos: Gizmos, _time: Res<Time>) {
     let range = 20;
-    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, true, WHITE, |x| x.sin());
+    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, WHITE, |x| Vec3 {
+        x: 0.0,
+        y: 0.0,
+        z: x.sin(),
+    });
     // animate
     // let t = time.elapsed_seconds();
     // draw_fn(gizmos, -10 + t as i32, 10 + t as i32, |x| x.sin());
 }
 
-/// draws planar function as a sequence of vectors,
-/// planar here meaning specifically on xz plane (parallel_z == true) or xy plane (parallel_z == false)
+/// draws planar function as a sequence of vectors
 pub fn draw_planar_fn_as_vert_vecs<F>(
     gizmos: &mut Gizmos,
     range_start: i32,
     range_end: i32,
-    parallel_z: bool, // for now just z (true), y (false)
     color: Srgba,
     function: F,
 ) where
-    F: Fn(f32) -> f32,
+    F: Fn(f32) -> Vec3,
 {
     let x_scaling = 0.2;
     let z_scaling = 0.2;
@@ -48,13 +50,13 @@ pub fn draw_planar_fn_as_vert_vecs<F>(
     let mut value = range_start as f32;
     while value < range_end as f32 {
         let x = value;
-        let z = function(x);
-        let y = 0.0;
-        let (z, y) = if parallel_z { (z, y) } else { (y, z) };
+        let vec = function(x);
 
         let scaled_x = x * x_scaling;
-        let scaled_y = y * y_scaling;
-        let scaled_z = z * z_scaling;
+        let scaled_z = vec.z * z_scaling;
+        let scaled_y = vec.y * y_scaling;
+
+        // println!("x: {}, y: {}, z: {}", scaled_x, scaled_y, scaled_z);
 
         gizmos.line(
             Vec3::new(scaled_x, 0.0, 0.0),
