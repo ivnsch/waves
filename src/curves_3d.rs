@@ -1,6 +1,5 @@
-use bevy::{color::palettes::css::WHITE, prelude::*};
-
 use crate::functions::draw_line_fn;
+use bevy::{color::palettes::css::WHITE, prelude::*};
 
 #[allow(dead_code)]
 pub fn add_curves_3d_system(app: &mut App) {
@@ -46,8 +45,6 @@ pub fn draw_planar_fn_as_vert_vecs<F>(
     let z_scaling = 0.2;
     let y_scaling = 0.2;
 
-    let mut last_point = None;
-
     let mut value = range_start as f32;
     while value < range_end as f32 {
         let x = value;
@@ -55,22 +52,16 @@ pub fn draw_planar_fn_as_vert_vecs<F>(
         let y = 0.0;
         let (z, y) = if parallel_z { (z, y) } else { (y, z) };
 
-        if let Some((last_x, last_z)) = last_point {
-            vert_x_arrow_out(
-                last_x * x_scaling,
-                last_z * z_scaling,
-                y * y_scaling,
-                gizmos,
-                color,
-            );
-            vert_x_arrow_out(x * x_scaling, z * z_scaling, y * y_scaling, gizmos, color);
-        }
+        let scaled_x = x * x_scaling;
+        let scaled_y = y * y_scaling;
+        let scaled_z = z * z_scaling;
 
-        last_point = Some((x, z));
+        gizmos.line(
+            Vec3::new(scaled_x, 0.0, 0.0),
+            Vec3::new(scaled_x, scaled_z, scaled_y),
+            color,
+        );
+
         value += 0.1;
     }
-}
-
-fn vert_x_arrow_out(x: f32, y: f32, z: f32, gizmos: &mut Gizmos, color: Srgba) {
-    gizmos.line(Vec3::new(x, 0.0, 0.0), Vec3::new(x, y, z), color);
 }
