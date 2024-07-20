@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    color::palettes::css::{BLACK, GREEN},
+    prelude::*,
+};
 use uom::si::{
     angle::{radian, Angle},
     electric_field::volt_per_meter,
@@ -8,9 +11,9 @@ use uom::si::{
 };
 
 use crate::wave_gui::{
-    add_warning_label, despawn_all_entities, generate_input_box, parse_float, AmplitudeInputMarker,
-    Freq, FrequencyInputMarker, GuiInputEntities, GuiInputs, GuiInputsEvent, Phase, PhaseMarker,
-    WaveLength, WaveLengthInputMarker,
+    add_button, add_label, add_warning_label, despawn_all_entities, generate_input_box,
+    parse_float, AmplitudeInputMarker, Freq, FrequencyInputMarker, GuiInputEntities, GuiInputs,
+    GuiInputsEvent, Phase, PhaseMarker, WaveLength, WaveLengthInputMarker,
 };
 
 pub fn setup_electromagnetic_wave_gui(
@@ -71,12 +74,31 @@ pub fn setup_electromagnetic_wave_gui(
 
     add_warning_label(&mut commands, root_id, &font);
 
+    add_label(&mut commands, root_id, &font, "Polarity");
+
+    add_button(
+        &mut commands,
+        root_id,
+        &font,
+        "Planar",
+        PlanarPolarityMarker,
+    );
+    add_button(
+        &mut commands,
+        root_id,
+        &font,
+        "Circular",
+        CircularPolarityMarker,
+    );
+
     commands.insert_resource(GuiInputEntities {
         amplitude: amplitude_input,
         wave_length: wave_length_input,
         frequency: frequency_input,
         phase: phase_input,
     });
+
+    commands.spawn(Polarity(PolarityInput::Planar));
 }
 
 pub fn setup_electromagnetic_wave_infos(commands: Commands, asset_server: Res<AssetServer>) {
@@ -177,3 +199,92 @@ pub fn listen_electromagnetic_wave_gui_inputs(
 
 #[derive(Component, Debug, Clone, Copy)]
 pub struct ElectromagneticAmplitude(pub ElectricField);
+
+#[derive(Debug, Default, Clone, Copy, Resource)]
+pub enum PolarityInput {
+    #[default]
+    Planar,
+    Circular,
+}
+
+#[derive(Event, Default, Debug)]
+pub struct PolarityInputEvent {
+    pub polarity: PolarityInput,
+}
+
+#[derive(Component, Debug, Clone, Copy)]
+pub struct Polarity(pub PolarityInput);
+
+#[derive(Component, Default)]
+pub struct PlanarPolarityMarker;
+
+#[derive(Component, Default)]
+pub struct CircularPolarityMarker;
+
+pub fn polarity_planar_button_handler(
+    mut interaction_query: Query<
+        (&Interaction, &mut BackgroundColor, &mut BorderColor),
+        (Changed<Interaction>, With<PlanarPolarityMarker>),
+    >,
+    mut my_events: EventWriter<PolarityInputEvent>,
+) {
+    for (interaction, mut color, mut border_color) in &mut interaction_query {
+        polarity_button_handler(
+            (interaction, &mut color, &mut border_color),
+            &mut my_events,
+            PolarityInput::Planar,
+        );
+    }
+}
+
+pub fn polarity_circular_button_handler(
+    mut interaction_query: Query<
+        (&Interaction, &mut BackgroundColor, &mut BorderColor),
+        (Changed<Interaction>, With<CircularPolarityMarker>),
+    >,
+    mut my_events: EventWriter<PolarityInputEvent>,
+) {
+    for (interaction, mut color, mut border_color) in &mut interaction_query {
+        polarity_button_handler(
+            (interaction, &mut color, &mut border_color),
+            &mut my_events,
+            PolarityInput::Circular,
+        );
+    }
+}
+
+fn polarity_button_handler(
+    interaction: (&Interaction, &mut BackgroundColor, &mut BorderColor),
+    my_events: &mut EventWriter<PolarityInputEvent>,
+    polarity: PolarityInput,
+) {
+    let (interaction, color, border_color) = interaction;
+    match *interaction {
+        Interaction::Pressed => {
+            *color = GREEN.into();
+            border_color.0 = GREEN.into();
+            my_events.send(PolarityInputEvent { polarity });
+        }
+        Interaction::Hovered => {}
+        Interaction::None => {
+            *color = BLACK.into();
+            border_color.0 = BLACK.into();
+        }
+    }
+}
+
+/// processes the gui events
+// TODO error handling (show on ui)
+#[allow(clippy::too_many_arguments)]
+pub fn listen_polarity_gui_inputs(
+    mut events: EventReader<PolarityInputEvent>,
+    mut commands: Commands,
+    polarity_query: Query<Entity, With<Polarity>>,
+) {
+    for input in events.read() {
+        despawn_all_entities(&mut commands, &polarity_query);
+
+        let polarity = Polarity(input.polarity);
+        commands.spawn(polarity);
+    }
+}

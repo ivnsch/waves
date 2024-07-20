@@ -1,5 +1,5 @@
 use bevy::{
-    color::palettes::css::{BLUE, GRAY, RED},
+    color::palettes::css::{BLUE, GRAY, RED, WHITE},
     prelude::*,
 };
 use bevy_simple_text_input::{
@@ -144,7 +144,11 @@ where
     spawned_text_input_bundle
 }
 
-fn generate_input_label(font: &Handle<Font>, label: &str) -> TextBundle {
+pub fn generate_input_label(font: &Handle<Font>, label: &str) -> TextBundle {
+    generate_label(font, label)
+}
+
+pub fn generate_label(font: &Handle<Font>, label: &str) -> TextBundle {
     TextBundle {
         style: Style {
             position_type: PositionType::Relative,
@@ -164,6 +168,12 @@ fn generate_input_label(font: &Handle<Font>, label: &str) -> TextBundle {
         ),
         ..default()
     }
+}
+
+pub fn add_label(commands: &mut Commands, root_id: Entity, font: &Handle<Font>, label: &str) {
+    let label = generate_label(&font, label);
+    let spawned_label = commands.spawn(label).id();
+    commands.entity(root_id).push_children(&[spawned_label]);
 }
 
 fn generate_input_wrapper() -> NodeBundle {
@@ -201,6 +211,10 @@ fn generate_warning_label(font: &Handle<Font>) -> TextBundle {
             left: Val::Px(0.0),
             width: Val::Percent(100.0),
             height: Val::Auto,
+            margin: UiRect {
+                bottom: Val::Px(10.0),
+                ..default()
+            },
             ..default()
         },
         text: Text::from_section(
@@ -245,6 +259,49 @@ fn generate_input(value: String) -> (NodeBundle, TextInputBundle) {
         }
         .with_text_style(input),
     )
+}
+
+pub fn add_button<T>(
+    commands: &mut Commands,
+    root_id: Entity,
+    font: &Handle<Font>,
+    label: &str,
+    marker: T,
+) where
+    T: Component,
+{
+    let button = commands
+        .spawn((
+            marker,
+            ButtonBundle {
+                style: Style {
+                    top: Val::Px(0.0),
+                    left: Val::Px(0.0),
+                    width: Val::Percent(100.0),
+                    height: Val::Px(30.0),
+                    // justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+        ))
+        .with_children(|parent| {
+            parent.spawn(TextBundle {
+                text: Text::from_section(
+                    label.to_string(),
+                    TextStyle {
+                        font: font.clone(),
+                        font_size: 14.0,
+                        color: WHITE.into(),
+                    }
+                    .clone(),
+                ),
+                ..Default::default()
+            });
+        })
+        .id();
+    commands.entity(root_id).push_children(&[button]);
 }
 
 pub fn text_listener(

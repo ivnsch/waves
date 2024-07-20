@@ -17,8 +17,10 @@ use uom::si::{
 use crate::{
     curves_3d::draw_planar_fn_as_vert_vecs,
     electromagnetic_wave_gui::{
-        listen_electromagnetic_wave_gui_inputs, setup_electromagnetic_wave_gui,
-        setup_electromagnetic_wave_infos, ElectromagneticAmplitude,
+        listen_electromagnetic_wave_gui_inputs, listen_polarity_gui_inputs,
+        polarity_circular_button_handler, polarity_planar_button_handler,
+        setup_electromagnetic_wave_gui, setup_electromagnetic_wave_infos, ElectromagneticAmplitude,
+        Polarity, PolarityInput, PolarityInputEvent,
     },
     wave::{calculate_u_raw, calculate_u_scalar_raw, RawUserParameters},
     wave_gui::{
@@ -39,6 +41,7 @@ pub fn add_electromagnetic_wave(app: &mut App) {
     let frequency = calculate_frequency(wave_length);
 
     app.add_event::<GuiInputsEvent>()
+        .add_event::<PolarityInputEvent>()
         .add_plugins(TextInputPlugin)
         .insert_resource(GuiInputs {
             amplitude: "1".to_owned(),
@@ -46,16 +49,19 @@ pub fn add_electromagnetic_wave(app: &mut App) {
             frequency: frequency.get::<hertz>().to_string(),
             phase: "0".to_owned(),
         })
+        .insert_resource(PolarityInput::Planar)
         .add_systems(Update, focus.before(TextInputSystem))
         .add_systems(
             Update,
             (
                 draw_electromagnetic_wave,
-                // draw_electromagnetic_wave_circular_pol,
                 listen_electromagnetic_wave_gui_inputs,
                 text_listener,
                 form_state_notifier_system,
                 validate_inputs,
+                polarity_planar_button_handler,
+                polarity_circular_button_handler,
+                listen_polarity_gui_inputs,
             ),
         )
         .add_systems(Startup, setup_electromagnetic_wave_infos)
@@ -136,9 +142,17 @@ fn draw_electromagnetic_wave(
     wave_length: Query<&WaveLength>,
     frequency: Query<&Freq>,
     phase: Query<&Phase>,
+    polarity: Query<&Polarity>,
 ) {
-    match draw_electromagnetic_wave_internal(gizmos, time, amplitude, wave_length, frequency, phase)
-    {
+    match draw_electromagnetic_wave_internal(
+        gizmos,
+        time,
+        amplitude,
+        wave_length,
+        frequency,
+        phase,
+        polarity,
+    ) {
         Ok(_) => {}
         Err(e) => match e {
             QuerySingleError::NoEntities(s) => {
@@ -152,9 +166,36 @@ fn draw_electromagnetic_wave(
         },
     }
 }
-
 #[allow(clippy::too_many_arguments)]
 fn draw_electromagnetic_wave_internal(
+    gizmos: Gizmos,
+    time: Res<Time>,
+    amplitude: Query<&ElectromagneticAmplitude>,
+    wave_length: Query<&WaveLength>,
+    frequency: Query<&Freq>,
+    phase: Query<&Phase>,
+    polarity: Query<&Polarity>,
+) -> Result<(), QuerySingleError> {
+    let polarity = *polarity.get_single()?;
+    match polarity.0 {
+        crate::electromagnetic_wave_gui::PolarityInput::Planar => {
+            draw_planar_electromagnetic_wave(gizmos, time, amplitude, wave_length, frequency, phase)
+        }
+        crate::electromagnetic_wave_gui::PolarityInput::Circular => {
+            draw_electromagnetic_wave_circular_pol(
+                gizmos,
+                time,
+                amplitude,
+                wave_length,
+                frequency,
+                phase,
+            )
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn draw_planar_electromagnetic_wave(
     mut gizmos: Gizmos,
     time: Res<Time>,
     amplitude: Query<&ElectromagneticAmplitude>,
@@ -189,37 +230,6 @@ fn draw_electromagnetic_wave_internal(
 
 #[allow(clippy::too_many_arguments)]
 fn draw_electromagnetic_wave_circular_pol(
-    gizmos: Gizmos,
-    time: Res<Time>,
-    amplitude: Query<&ElectromagneticAmplitude>,
-    wave_length: Query<&WaveLength>,
-    frequency: Query<&Freq>,
-    phase: Query<&Phase>,
-) {
-    match draw_electromagnetic_wave_circular_pol_internal(
-        gizmos,
-        time,
-        amplitude,
-        wave_length,
-        frequency,
-        phase,
-    ) {
-        Ok(_) => {}
-        Err(e) => match e {
-            QuerySingleError::NoEntities(s) => {
-                // this is logged 2x at the beginning (even if we set defaults in insert_resource). doesn't seem to be an issue.
-                // after that it shouldn't appear again, because each field should always have a value.
-                info!("No entity added yet: {}", s)
-            }
-            QuerySingleError::MultipleEntities(s) => {
-                error!("Found multiple entities of a type: {}", s)
-            }
-        },
-    }
-}
-
-#[allow(clippy::too_many_arguments)]
-fn draw_electromagnetic_wave_circular_pol_internal(
     mut gizmos: Gizmos,
     time: Res<Time>,
     amplitude: Query<&ElectromagneticAmplitude>,
