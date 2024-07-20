@@ -20,7 +20,7 @@ use crate::{
         listen_electromagnetic_wave_gui_inputs, setup_electromagnetic_wave_gui,
         setup_electromagnetic_wave_infos, ElectromagneticAmplitude,
     },
-    wave::{calculate_u_raw, RawUserParameters},
+    wave::{calculate_u_raw, calculate_u_scalar_raw, RawUserParameters},
     wave_gui::{
         focus, form_state_notifier_system, text_listener, Freq, GuiInputs, GuiInputsEvent, Phase,
         WarningMarker, WaveLength,
@@ -51,6 +51,7 @@ pub fn add_electromagnetic_wave(app: &mut App) {
             Update,
             (
                 draw_electromagnetic_wave,
+                // draw_electromagnetic_wave_circular_pol,
                 listen_electromagnetic_wave_gui_inputs,
                 text_listener,
                 form_state_notifier_system,
@@ -175,12 +176,93 @@ fn draw_electromagnetic_wave_internal(
 
     // electric
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, WHITE, |x: f32| {
-        calculate_u(Length::new::<meter>(x), t, &user_pars, Vec3::Z).to_vec3()
+        calculate_u_planar(Length::new::<meter>(x), t, &user_pars, Vec3::Z).to_vec3()
     });
 
     // magnetic
     draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, GREEN, |x: f32| {
-        calculate_u(Length::new::<meter>(x), t, &user_pars, Vec3::Y).to_vec3()
+        calculate_u_planar(Length::new::<meter>(x), t, &user_pars, Vec3::Y).to_vec3()
+    });
+
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+fn draw_electromagnetic_wave_circular_pol(
+    gizmos: Gizmos,
+    time: Res<Time>,
+    amplitude: Query<&ElectromagneticAmplitude>,
+    wave_length: Query<&WaveLength>,
+    frequency: Query<&Freq>,
+    phase: Query<&Phase>,
+) {
+    match draw_electromagnetic_wave_circular_pol_internal(
+        gizmos,
+        time,
+        amplitude,
+        wave_length,
+        frequency,
+        phase,
+    ) {
+        Ok(_) => {}
+        Err(e) => match e {
+            QuerySingleError::NoEntities(s) => {
+                // this is logged 2x at the beginning (even if we set defaults in insert_resource). doesn't seem to be an issue.
+                // after that it shouldn't appear again, because each field should always have a value.
+                info!("No entity added yet: {}", s)
+            }
+            QuerySingleError::MultipleEntities(s) => {
+                error!("Found multiple entities of a type: {}", s)
+            }
+        },
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn draw_electromagnetic_wave_circular_pol_internal(
+    mut gizmos: Gizmos,
+    time: Res<Time>,
+    amplitude: Query<&ElectromagneticAmplitude>,
+    wave_length: Query<&WaveLength>,
+    frequency: Query<&Freq>,
+    phase: Query<&Phase>,
+) -> Result<(), QuerySingleError> {
+    let user_pars = ElectromagneticWaveUserParameters {
+        amplitude: *amplitude.get_single()?,
+        wave_length: *wave_length.get_single()?,
+        frequency: *frequency.get_single()?,
+        phase: *phase.get_single()?,
+    };
+
+    let range = 20;
+
+    let t = uom::si::f32::Time::new::<second>(time.elapsed_seconds());
+    // let t = uom::si::f32::Time::new::<second>(0);  // not animated
+
+    // electric
+    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, WHITE, |x: f32| {
+        calculate_u_circular(
+            Length::new::<meter>(x),
+            t,
+            &user_pars,
+            Vec3::Y,
+            Vec3::Z,
+            true,
+        )
+        .to_vec3()
+    });
+
+    // magnetic
+    draw_planar_fn_as_vert_vecs(&mut gizmos, -range, range, GREEN, |x: f32| {
+        calculate_u_circular(
+            Length::new::<meter>(x),
+            t,
+            &user_pars,
+            Vec3::Z,
+            Vec3::Y,
+            false,
+        )
+        .to_vec3()
     });
 
     Ok(())
@@ -206,7 +288,7 @@ impl From<ElectromagneticWaveUserParameters> for RawUserParameters {
 }
 
 #[allow(clippy::too_many_arguments)]
-fn calculate_u(
+fn calculate_u_planar(
     x: Length,
     t: uom::si::f32::Time,
     up: &ElectromagneticWaveUserParameters,
@@ -218,6 +300,36 @@ fn calculate_u(
         x: ElectricField::new::<volt_per_meter>(raw.x),
         y: ElectricField::new::<volt_per_meter>(raw.y),
         z: ElectricField::new::<volt_per_meter>(raw.z),
+    }
+}
+
+/// u(x, y) = A(cos(kx - wt)y + sin (kx - wt)z)
+/// see e.g. https://web.mit.edu/sahughes/www/8.022/lec21.pdf section 21.5
+#[allow(clippy::too_many_arguments)]
+fn calculate_u_circular(
+    x: Length,
+    t: uom::si::f32::Time,
+    up: &ElectromagneticWaveUserParameters,
+    unit_vector1: Vec3,
+    unit_vector2: Vec3,
+    sign_sin_cos: bool, // true for + between cos and sin terms, false for -
+) -> ElectricFieldVec3 {
+    let scalar = calculate_u_scalar_raw(x, t, &up.clone().into());
+    let cos = scalar.cos();
+    let sin = scalar.sin();
+
+    let term1 = unit_vector1 * cos;
+    let mut term2 = unit_vector2 * sin;
+
+    if !sign_sin_cos {
+        term2 = -term2;
+    }
+    let sub = term1 + term2;
+
+    ElectricFieldVec3 {
+        x: up.amplitude.0 * sub.x,
+        y: up.amplitude.0 * sub.y,
+        z: up.amplitude.0 * sub.z,
     }
 }
 

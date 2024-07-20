@@ -165,6 +165,12 @@ pub fn calculate_u_raw(
     up: &RawUserParameters,
     unit_vector: Vec3,
 ) -> Vec3 {
+    let scalar = calculate_u_scalar_raw(x, t, up).cos();
+    unit_vector * (up.amplitude * scalar)
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn calculate_u_scalar_raw(x: Length, t: uom::si::f32::Time, up: &RawUserParameters) -> f32 {
     let screen_speed_pars = to_screen_speed(up);
     // println!("screen_speed_pars: {:?}", screen_speed_pars);
 
@@ -174,21 +180,17 @@ pub fn calculate_u_raw(
 
     let angular_frequency = 2.0 * PI * screen_speed_pars.frequency.get::<hertz>();
 
-    let scalar = ((k * x.get::<meter>()) - (angular_frequency * t.get::<second>())
-        + up.phase.0.get::<radian>())
-    .cos();
-
-    unit_vector * (up.amplitude * scalar)
+    (k * x.get::<meter>()) - (angular_frequency * t.get::<second>()) + up.phase.0.get::<radian>()
 }
 
 #[derive(Debug)]
-struct ScreenSpeedParameters {
-    wave_length: Length,
-    frequency: Frequency,
+pub struct ScreenSpeedParameters {
+    pub wave_length: Length,
+    pub frequency: Frequency,
 }
 
 /// slow down for animation
-fn to_screen_speed(up: &RawUserParameters) -> ScreenSpeedParameters {
+pub fn to_screen_speed(up: &RawUserParameters) -> ScreenSpeedParameters {
     let speed_factor: f32 = 0.00000001;
     // v = fλ -> v * factor = (fλ) * factor
     ScreenSpeedParameters {
