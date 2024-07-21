@@ -1,12 +1,11 @@
 [package]
-name = "things"
+name = "waves"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# bevy = "0.14.0-rc.2"
 bevy = { version = "0.14.0" }
 bevy_simple_text_input = "0.8.0"
 uom = "0.36.0"

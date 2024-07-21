@@ -3348,16 +3348,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "things"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy_simple_text_input",
- "once_cell",
- "uom",
-]
-
-[[package]]
 name = "thiserror"
 version = "1.0.61"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3673,6 +3663,16 @@ name = "wasm-bindgen-shared"
 version = "0.2.92"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af190c94f2773fdb3729c55b007a722abb5384da03bc0986df4c289bf5567e96"
+
+[[package]]
+name = "waves"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_simple_text_input",
+ "once_cell",
+ "uom",
+]
 
 [[package]]
 name = "web-sys"
