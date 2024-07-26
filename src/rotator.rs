@@ -1,13 +1,11 @@
 use bevy::prelude::*;
 use std::fmt;
 
-use crate::scratchpad_3d::MySphere;
-
 pub struct RotatorPlugin;
 
 impl Plugin for RotatorPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (run_sphere_rotator, run_rotator));
+        app.add_systems(Update, run_rotator);
     }
 }
 
@@ -56,52 +54,6 @@ Rotator Controls:
             self.key_x, self.key_y, self.key_z,
         )
     }
-}
-
-fn run_sphere_rotator(
-    key_input: Res<ButtonInput<KeyCode>>,
-    mut sphere: Query<&mut Transform, With<MySphere>>,
-    mut rotator: Query<&mut Rotator, With<Camera>>,
-) {
-    if let Ok(mut transform) = sphere.get_single_mut() {
-        let q = rotator.get_single_mut();
-        if let Ok(mut controller) = q {
-            if !controller.initialized {
-                let (yaw, pitch, _roll) = transform.rotation.to_euler(EulerRot::YXZ);
-                controller.yaw = yaw;
-                controller.pitch = pitch;
-                controller.initialized = true;
-                info!("{}", *controller);
-            }
-
-            let mut rotation = 0.03;
-            if key_input.pressed(controller.key_shift_left)
-                || key_input.pressed(controller.key_shift_right)
-            {
-                rotation = -rotation;
-            }
-
-            // Handle key input
-            if key_input.pressed(controller.key_y) {
-                transform.rotate_around(
-                    Vec3::ZERO,
-                    Quat::from_euler(EulerRot::XYZ, 0.0, 0.0, rotation),
-                );
-            }
-            if key_input.pressed(controller.key_z) {
-                transform.rotate_around(
-                    Vec3::ZERO,
-                    Quat::from_euler(EulerRot::XYZ, 0.0, rotation, 0.0),
-                );
-            }
-            if key_input.pressed(controller.key_x) {
-                transform.rotate_around(
-                    Vec3::ZERO,
-                    Quat::from_euler(EulerRot::XYZ, rotation, 0.0, 0.0),
-                );
-            }
-        }
-    };
 }
 
 #[allow(clippy::too_many_arguments)]
