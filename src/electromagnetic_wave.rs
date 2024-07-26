@@ -352,7 +352,7 @@ pub struct ElectricFieldVec3 {
 
 /// f32 vec
 impl ElectricFieldVec3 {
-    fn to_vec3(self) -> Vec3 {
+    fn to_vec3(&self) -> Vec3 {
         Vec3::new(
             self.x.get::<volt_per_meter>(),
             self.y.get::<volt_per_meter>(),

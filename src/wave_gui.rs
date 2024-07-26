@@ -171,7 +171,7 @@ pub fn generate_label(font: &Handle<Font>, label: &str) -> TextBundle {
 }
 
 pub fn add_label(commands: &mut Commands, root_id: Entity, font: &Handle<Font>, label: &str) {
-    let label = generate_label(&font, label);
+    let label = generate_label(font, label);
     let spawned_label = commands.spawn(label).id();
     commands.entity(root_id).push_children(&[spawned_label]);
 }

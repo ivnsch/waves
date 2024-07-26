@@ -146,7 +146,7 @@ pub struct LengthVec3 {
 
 /// f32 vec
 impl LengthVec3 {
-    fn to_vec3(self) -> Vec3 {
+    fn to_vec3(&self) -> Vec3 {
         Vec3::new(
             self.x.get::<meter>(),
             self.y.get::<meter>(),

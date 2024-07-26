@@ -221,6 +221,7 @@ pub struct PlanarPolarityMarker;
 #[derive(Component, Default)]
 pub struct CircularPolarityMarker;
 
+#[allow(clippy::type_complexity)]
 pub fn polarity_planar_button_handler(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, &mut BorderColor),
@@ -237,6 +238,7 @@ pub fn polarity_planar_button_handler(
     }
 }
 
+#[allow(clippy::type_complexity)]
 pub fn polarity_circular_button_handler(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, &mut BorderColor),
