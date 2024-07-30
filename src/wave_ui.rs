@@ -13,7 +13,7 @@ use uom::si::{
 };
 
 #[derive(Resource)]
-pub struct GuiInputs {
+pub struct UiInputs {
     pub amplitude: String,
     pub wave_length: String,
     pub frequency: String,
@@ -21,7 +21,7 @@ pub struct GuiInputs {
 }
 
 #[derive(Event, Default, Debug)]
-pub struct GuiInputsEvent {
+pub struct UiInputsEvent {
     pub amplitude: String,
     pub wave_length: String,
     pub frequency: String,
@@ -29,7 +29,7 @@ pub struct GuiInputsEvent {
 }
 
 #[derive(Resource)]
-pub struct GuiInputEntities {
+pub struct UiInputEntities {
     pub amplitude: Entity,
     pub wave_length: Entity,
     pub frequency: Entity,
@@ -49,10 +49,10 @@ pub struct PhaseMarker;
 #[derive(Component, Default)]
 pub struct WarningMarker;
 
-pub fn setup_wave_gui(
+pub fn setup_wave_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    form_state: Res<GuiInputs>,
+    form_state: Res<UiInputs>,
 ) {
     let font = asset_server.load("fonts/FiraMono-Medium.ttf");
 
@@ -107,7 +107,7 @@ pub fn setup_wave_gui(
 
     add_warning_label(&mut commands, root_id, &font);
 
-    commands.insert_resource(GuiInputEntities {
+    commands.insert_resource(UiInputEntities {
         amplitude: amplitude_input,
         wave_length: wave_length_input,
         frequency: frequency_input,
@@ -306,8 +306,8 @@ pub fn add_button<T>(
 
 pub fn text_listener(
     mut events: EventReader<TextInputSubmitEvent>,
-    mut inputs: ResMut<GuiInputs>,
-    input_entities: Res<GuiInputEntities>,
+    mut inputs: ResMut<UiInputs>,
+    input_entities: Res<UiInputEntities>,
 ) {
     for event in events.read() {
         println!("read an event");
@@ -332,11 +332,11 @@ pub fn text_listener(
 /// sends an event with all current form inputs strings, to be processed further somewhere else
 /// TODO don't send this event constantly, ideally only when pressing enter in a field
 pub fn form_state_notifier_system(
-    form_state: Res<GuiInputs>,
-    mut my_events: EventWriter<GuiInputsEvent>,
+    form_state: Res<UiInputs>,
+    mut my_events: EventWriter<UiInputsEvent>,
 ) {
     // println!("called form_state_notifier_system");
-    my_events.send(GuiInputsEvent {
+    my_events.send(UiInputsEvent {
         amplitude: form_state.amplitude.clone(),
         wave_length: form_state.wave_length.clone(),
         frequency: form_state.frequency.clone(),
@@ -344,11 +344,11 @@ pub fn form_state_notifier_system(
     });
 }
 
-/// processes the gui events
+/// processes the ui events
 // TODO error handling (show on ui)
 #[allow(clippy::too_many_arguments)]
-pub fn listen_wave_gui_inputs(
-    mut events: EventReader<GuiInputsEvent>,
+pub fn listen_wave_ui_inputs(
+    mut events: EventReader<UiInputsEvent>,
     mut commands: Commands,
     amplitude_query: Query<Entity, With<Amplitude>>,
     wave_length_query: Query<Entity, With<WaveLength>>,

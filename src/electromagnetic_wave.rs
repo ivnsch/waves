@@ -16,15 +16,15 @@ use uom::si::{
 
 use crate::{
     curves_3d::draw_planar_fn_as_vert_vecs,
-    electromagnetic_wave_gui::{
-        listen_electromagnetic_wave_gui_inputs, listen_polarity_gui_inputs,
+    electromagnetic_wave_ui::{
+        listen_electromagnetic_wave_ui_inputs, listen_polarity_ui_inputs,
         polarity_circular_button_handler, polarity_planar_button_handler,
-        setup_electromagnetic_wave_gui, setup_electromagnetic_wave_infos, ElectromagneticAmplitude,
+        setup_electromagnetic_wave_infos, setup_electromagnetic_wave_ui, ElectromagneticAmplitude,
         Polarity, PolarityInput, PolarityInputEvent,
     },
     wave::{calculate_u_raw, calculate_u_scalar_raw, RawUserParameters},
-    wave_gui::{
-        focus, form_state_notifier_system, text_listener, Freq, GuiInputs, GuiInputsEvent, Phase,
+    wave_ui::{
+        focus, form_state_notifier_system, text_listener, Freq, Phase, UiInputs, UiInputsEvent,
         WarningMarker, WaveLength,
     },
 };
@@ -40,10 +40,10 @@ pub fn add_electromagnetic_wave(app: &mut App) {
     // note: for now *not* correcting new user inputs to speed of light
     let frequency = calculate_frequency(wave_length);
 
-    app.add_event::<GuiInputsEvent>()
+    app.add_event::<UiInputsEvent>()
         .add_event::<PolarityInputEvent>()
         .add_plugins(TextInputPlugin)
-        .insert_resource(GuiInputs {
+        .insert_resource(UiInputs {
             amplitude: "1".to_owned(),
             wave_length: wave_length.get::<meter>().to_string(),
             frequency: frequency.get::<hertz>().to_string(),
@@ -55,17 +55,17 @@ pub fn add_electromagnetic_wave(app: &mut App) {
             Update,
             (
                 draw_electromagnetic_wave,
-                listen_electromagnetic_wave_gui_inputs,
+                listen_electromagnetic_wave_ui_inputs,
                 text_listener,
                 form_state_notifier_system,
                 validate_inputs,
                 polarity_planar_button_handler,
                 polarity_circular_button_handler,
-                listen_polarity_gui_inputs,
+                listen_polarity_ui_inputs,
             ),
         )
         .add_systems(Startup, setup_electromagnetic_wave_infos)
-        .add_systems(Startup, setup_electromagnetic_wave_gui);
+        .add_systems(Startup, setup_electromagnetic_wave_ui);
 }
 
 fn calculate_frequency(wave_length: Length) -> Frequency {
@@ -178,10 +178,10 @@ fn draw_electromagnetic_wave_internal(
 ) -> Result<(), QuerySingleError> {
     let polarity = *polarity.get_single()?;
     match polarity.0 {
-        crate::electromagnetic_wave_gui::PolarityInput::Planar => {
+        crate::electromagnetic_wave_ui::PolarityInput::Planar => {
             draw_planar_electromagnetic_wave(gizmos, time, amplitude, wave_length, frequency, phase)
         }
-        crate::electromagnetic_wave_gui::PolarityInput::Circular => {
+        crate::electromagnetic_wave_ui::PolarityInput::Circular => {
             draw_electromagnetic_wave_circular_pol(
                 gizmos,
                 time,

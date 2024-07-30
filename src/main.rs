@@ -3,14 +3,14 @@ mod curves_2d;
 mod curves_3d;
 mod defocus;
 mod electromagnetic_wave;
-mod electromagnetic_wave_gui;
+mod electromagnetic_wave_ui;
 mod functions;
 mod grid_2d;
 mod rotator;
 mod system_2d;
 mod system_3d;
 mod wave;
-mod wave_gui;
+mod wave_ui;
 
 use bevy::app::App;
 #[allow(unused_imports)]

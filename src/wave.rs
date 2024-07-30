@@ -1,8 +1,8 @@
 use std::f32::consts::PI;
 
-use crate::wave_gui::{
-    focus, form_state_notifier_system, listen_wave_gui_inputs, setup_wave_gui, text_listener,
-    Amplitude, Freq, GuiInputs, GuiInputsEvent, Phase, WaveLength,
+use crate::wave_ui::{
+    focus, form_state_notifier_system, listen_wave_ui_inputs, setup_wave_ui, text_listener,
+    Amplitude, Freq, Phase, UiInputs, UiInputsEvent, WaveLength,
 };
 use bevy::{color::palettes::css::WHITE, ecs::query::QuerySingleError, prelude::*};
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
@@ -16,21 +16,21 @@ use uom::si::{
 
 #[allow(dead_code)]
 pub fn add_wave_2d_system(app: &mut App) {
-    app.add_event::<GuiInputsEvent>()
+    app.add_event::<UiInputsEvent>()
         .add_plugins(TextInputPlugin)
-        .insert_resource(GuiInputs {
+        .insert_resource(UiInputs {
             amplitude: "1".to_owned(),
             wave_length: "2".to_owned(),
             frequency: "0.5".to_owned(),
             phase: "0".to_owned(),
         })
-        .add_systems(Startup, setup_wave_gui)
+        .add_systems(Startup, setup_wave_ui)
         .add_systems(Update, focus.before(TextInputSystem))
         .add_systems(
             Update,
             (
                 draw_wave,
-                listen_wave_gui_inputs,
+                listen_wave_ui_inputs,
                 text_listener,
                 form_state_notifier_system,
             ),

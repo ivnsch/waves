@@ -10,16 +10,16 @@ use uom::si::{
     length::meter,
 };
 
-use crate::wave_gui::{
+use crate::wave_ui::{
     add_button, add_label, add_warning_label, despawn_all_entities, generate_input_box,
-    parse_float, AmplitudeInputMarker, Freq, FrequencyInputMarker, GuiInputEntities, GuiInputs,
-    GuiInputsEvent, Phase, PhaseMarker, WaveLength, WaveLengthInputMarker,
+    parse_float, AmplitudeInputMarker, Freq, FrequencyInputMarker, Phase, PhaseMarker,
+    UiInputEntities, UiInputs, UiInputsEvent, WaveLength, WaveLengthInputMarker,
 };
 
-pub fn setup_electromagnetic_wave_gui(
+pub fn setup_electromagnetic_wave_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    form_state: Res<GuiInputs>,
+    form_state: Res<UiInputs>,
 ) {
     let font = asset_server.load("fonts/FiraMono-Medium.ttf");
 
@@ -91,7 +91,7 @@ pub fn setup_electromagnetic_wave_gui(
         CircularPolarityMarker,
     );
 
-    commands.insert_resource(GuiInputEntities {
+    commands.insert_resource(UiInputEntities {
         amplitude: amplitude_input,
         wave_length: wave_length_input,
         frequency: frequency_input,
@@ -151,11 +151,11 @@ fn generate_info_label(font: &Handle<Font>, label: &str, top: f32) -> TextBundle
     }
 }
 
-/// processes the gui events
+/// processes the ui events
 // TODO error handling (show on ui)
 #[allow(clippy::too_many_arguments)]
-pub fn listen_electromagnetic_wave_gui_inputs(
-    mut events: EventReader<GuiInputsEvent>,
+pub fn listen_electromagnetic_wave_ui_inputs(
+    mut events: EventReader<UiInputsEvent>,
     mut commands: Commands,
     amplitude_query: Query<Entity, With<ElectromagneticAmplitude>>,
     wave_length_query: Query<Entity, With<WaveLength>>,
@@ -278,7 +278,7 @@ fn polarity_button_handler(
 /// processes the gui events
 // TODO error handling (show on ui)
 #[allow(clippy::too_many_arguments)]
-pub fn listen_polarity_gui_inputs(
+pub fn listen_polarity_ui_inputs(
     mut events: EventReader<PolarityInputEvent>,
     mut commands: Commands,
     polarity_query: Query<Entity, With<Polarity>>,
