@@ -54,7 +54,12 @@ pub fn add_electromagnetic_wave(app: &mut App) {
         .add_systems(
             Update,
             (
-                draw_electromagnetic_wave_internal.pipe(draw_electromagnetic_wave),
+                draw_planar_electromagnetic_wave
+                    .pipe(draw_electromagnetic_wave)
+                    .run_if(is_planar_polarity_selected),
+                draw_electromagnetic_wave_circular_pol
+                    .pipe(draw_electromagnetic_wave)
+                    .run_if(is_circular_polarity_selected),
                 listen_electromagnetic_wave_ui_inputs,
                 text_listener,
                 form_state_notifier_system,
@@ -75,6 +80,20 @@ fn calculate_frequency(wave_length: Length) -> Frequency {
 #[allow(dead_code)]
 fn calculate_wave_length(frequency: Frequency) -> Length {
     *SPEED_OF_LIGHT / frequency
+}
+
+fn is_planar_polarity_selected(polarity: Res<PolarityInput>) -> bool {
+    match *polarity {
+        PolarityInput::Planar => true,
+        _ => false,
+    }
+}
+
+fn is_circular_polarity_selected(polarity: Res<PolarityInput>) -> bool {
+    match *polarity {
+        PolarityInput::Circular => true,
+        _ => false,
+    }
 }
 
 fn validate_inputs(In(result): In<Result<(), QuerySingleError>>) {
@@ -144,30 +163,6 @@ fn draw_electromagnetic_wave(In(result): In<Result<(), QuerySingleError>>) {
                 error!("Found multiple entities of a type: {}", s)
             }
         },
-    }
-}
-#[allow(clippy::too_many_arguments)]
-fn draw_electromagnetic_wave_internal(
-    gizmos: Gizmos,
-    time: Res<Time>,
-    amplitude: Query<&ElectromagneticAmplitude>,
-    wave_length: Query<&WaveLength>,
-    frequency: Query<&Freq>,
-    phase: Query<&Phase>,
-    polarity: Res<PolarityInput>,
-) -> Result<(), QuerySingleError> {
-    match *polarity {
-        PolarityInput::Planar => {
-            draw_planar_electromagnetic_wave(gizmos, time, amplitude, wave_length, frequency, phase)
-        }
-        PolarityInput::Circular => draw_electromagnetic_wave_circular_pol(
-            gizmos,
-            time,
-            amplitude,
-            wave_length,
-            frequency,
-            phase,
-        ),
     }
 }
 
