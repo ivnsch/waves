@@ -54,11 +54,11 @@ pub fn add_electromagnetic_wave(app: &mut App) {
         .add_systems(
             Update,
             (
-                draw_electromagnetic_wave,
+                draw_electromagnetic_wave_internal.pipe(draw_electromagnetic_wave),
                 listen_electromagnetic_wave_ui_inputs,
                 text_listener,
                 form_state_notifier_system,
-                validate_inputs,
+                validate_inputs_internal.pipe(validate_inputs),
                 polarity_planar_button_handler,
                 polarity_circular_button_handler,
                 listen_polarity_ui_inputs,
@@ -77,12 +77,8 @@ fn calculate_wave_length(frequency: Frequency) -> Length {
     *SPEED_OF_LIGHT / frequency
 }
 
-fn validate_inputs(
-    frequency: Query<&Freq>,
-    wave_length: Query<&WaveLength>,
-    warning_query: Query<&mut Text, With<WarningMarker>>,
-) {
-    match validate_inputs_internal(frequency, wave_length, warning_query) {
+fn validate_inputs(In(result): In<Result<(), QuerySingleError>>) {
+    match result {
         Ok(_) => {}
         Err(e) => match e {
             QuerySingleError::NoEntities(s) => {
@@ -135,24 +131,8 @@ fn validate_inputs_internal(
 }
 
 #[allow(clippy::too_many_arguments)]
-fn draw_electromagnetic_wave(
-    gizmos: Gizmos,
-    time: Res<Time>,
-    amplitude: Query<&ElectromagneticAmplitude>,
-    wave_length: Query<&WaveLength>,
-    frequency: Query<&Freq>,
-    phase: Query<&Phase>,
-    polarity: Res<PolarityInput>,
-) {
-    match draw_electromagnetic_wave_internal(
-        gizmos,
-        time,
-        amplitude,
-        wave_length,
-        frequency,
-        phase,
-        polarity,
-    ) {
+fn draw_electromagnetic_wave(In(result): In<Result<(), QuerySingleError>>) {
+    match result {
         Ok(_) => {}
         Err(e) => match e {
             QuerySingleError::NoEntities(s) => {
