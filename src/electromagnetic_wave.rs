@@ -177,19 +177,17 @@ fn draw_electromagnetic_wave_internal(
     polarity: Res<PolarityInput>,
 ) -> Result<(), QuerySingleError> {
     match *polarity {
-        crate::electromagnetic_wave_ui::PolarityInput::Planar => {
+        PolarityInput::Planar => {
             draw_planar_electromagnetic_wave(gizmos, time, amplitude, wave_length, frequency, phase)
         }
-        crate::electromagnetic_wave_ui::PolarityInput::Circular => {
-            draw_electromagnetic_wave_circular_pol(
-                gizmos,
-                time,
-                amplitude,
-                wave_length,
-                frequency,
-                phase,
-            )
-        }
+        PolarityInput::Circular => draw_electromagnetic_wave_circular_pol(
+            gizmos,
+            time,
+            amplitude,
+            wave_length,
+            frequency,
+            phase,
+        ),
     }
 }
 
