@@ -98,7 +98,7 @@ pub fn setup_electromagnetic_wave_ui(
         phase: phase_input,
     });
 
-    commands.spawn(Polarity(PolarityInput::Planar));
+    commands.insert_resource(PolarityInput::Planar);
 }
 
 pub fn setup_electromagnetic_wave_infos(commands: Commands, asset_server: Res<AssetServer>) {
@@ -212,9 +212,6 @@ pub struct PolarityInputEvent {
     pub polarity: PolarityInput,
 }
 
-#[derive(Component, Debug, Clone, Copy)]
-pub struct Polarity(pub PolarityInput);
-
 #[derive(Component, Default)]
 pub struct PlanarPolarityMarker;
 
@@ -280,13 +277,9 @@ fn polarity_button_handler(
 #[allow(clippy::too_many_arguments)]
 pub fn listen_polarity_ui_inputs(
     mut events: EventReader<PolarityInputEvent>,
-    mut commands: Commands,
-    polarity_query: Query<Entity, With<Polarity>>,
+    mut model: ResMut<PolarityInput>,
 ) {
     for input in events.read() {
-        despawn_all_entities(&mut commands, &polarity_query);
-
-        let polarity = Polarity(input.polarity);
-        commands.spawn(polarity);
+        *model = input.polarity;
     }
 }

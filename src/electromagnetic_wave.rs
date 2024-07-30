@@ -20,7 +20,7 @@ use crate::{
         listen_electromagnetic_wave_ui_inputs, listen_polarity_ui_inputs,
         polarity_circular_button_handler, polarity_planar_button_handler,
         setup_electromagnetic_wave_infos, setup_electromagnetic_wave_ui, ElectromagneticAmplitude,
-        Polarity, PolarityInput, PolarityInputEvent,
+        PolarityInput, PolarityInputEvent,
     },
     wave::{calculate_u_raw, calculate_u_scalar_raw, RawUserParameters},
     wave_ui::{
@@ -142,7 +142,7 @@ fn draw_electromagnetic_wave(
     wave_length: Query<&WaveLength>,
     frequency: Query<&Freq>,
     phase: Query<&Phase>,
-    polarity: Query<&Polarity>,
+    polarity: Res<PolarityInput>,
 ) {
     match draw_electromagnetic_wave_internal(
         gizmos,
@@ -174,10 +174,9 @@ fn draw_electromagnetic_wave_internal(
     wave_length: Query<&WaveLength>,
     frequency: Query<&Freq>,
     phase: Query<&Phase>,
-    polarity: Query<&Polarity>,
+    polarity: Res<PolarityInput>,
 ) -> Result<(), QuerySingleError> {
-    let polarity = *polarity.get_single()?;
-    match polarity.0 {
+    match *polarity {
         crate::electromagnetic_wave_ui::PolarityInput::Planar => {
             draw_planar_electromagnetic_wave(gizmos, time, amplitude, wave_length, frequency, phase)
         }
