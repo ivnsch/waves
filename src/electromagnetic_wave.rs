@@ -54,16 +54,16 @@ pub fn add_electromagnetic_wave(app: &mut App) {
         .add_systems(
             Update,
             (
-                draw_planar_electromagnetic_wave
-                    .pipe(draw_electromagnetic_wave)
+                draw_planar_polarity_electromagnetic_wave
+                    .pipe(handle_draw_electromagnetic_wave_result)
                     .run_if(is_planar_polarity_selected),
-                draw_electromagnetic_wave_circular_pol
-                    .pipe(draw_electromagnetic_wave)
+                draw_circular_polarity_electromagnetic_wave
+                    .pipe(handle_draw_electromagnetic_wave_result)
                     .run_if(is_circular_polarity_selected),
                 listen_electromagnetic_wave_ui_inputs,
                 text_listener,
                 form_state_notifier_system,
-                validate_inputs_internal.pipe(validate_inputs),
+                validate_inputs.pipe(handle_validate_inputs_result),
                 polarity_planar_button_handler,
                 polarity_circular_button_handler,
                 listen_polarity_ui_inputs,
@@ -96,7 +96,7 @@ fn is_circular_polarity_selected(polarity: Res<PolarityInput>) -> bool {
     }
 }
 
-fn validate_inputs(In(result): In<Result<(), QuerySingleError>>) {
+fn handle_validate_inputs_result(In(result): In<Result<(), QuerySingleError>>) {
     match result {
         Ok(_) => {}
         Err(e) => match e {
@@ -110,7 +110,7 @@ fn validate_inputs(In(result): In<Result<(), QuerySingleError>>) {
     }
 }
 
-fn validate_inputs_internal(
+fn validate_inputs(
     frequency: Query<&Freq>,
     wave_length: Query<&WaveLength>,
     mut warning_query: Query<&mut Text, With<WarningMarker>>,
@@ -150,7 +150,7 @@ fn validate_inputs_internal(
 }
 
 #[allow(clippy::too_many_arguments)]
-fn draw_electromagnetic_wave(In(result): In<Result<(), QuerySingleError>>) {
+fn handle_draw_electromagnetic_wave_result(In(result): In<Result<(), QuerySingleError>>) {
     match result {
         Ok(_) => {}
         Err(e) => match e {
@@ -167,7 +167,7 @@ fn draw_electromagnetic_wave(In(result): In<Result<(), QuerySingleError>>) {
 }
 
 #[allow(clippy::too_many_arguments)]
-fn draw_planar_electromagnetic_wave(
+fn draw_planar_polarity_electromagnetic_wave(
     mut gizmos: Gizmos,
     time: Res<Time>,
     amplitude: Query<&ElectromagneticAmplitude>,
@@ -201,7 +201,7 @@ fn draw_planar_electromagnetic_wave(
 }
 
 #[allow(clippy::too_many_arguments)]
-fn draw_electromagnetic_wave_circular_pol(
+fn draw_circular_polarity_electromagnetic_wave(
     mut gizmos: Gizmos,
     time: Res<Time>,
     amplitude: Query<&ElectromagneticAmplitude>,
