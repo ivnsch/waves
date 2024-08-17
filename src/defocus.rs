@@ -3,6 +3,8 @@ use bevy_simple_text_input::TextInputInactive;
 
 pub struct DefocusPlugin;
 
+/// bevy plugin to de-focus text input when pressing esc
+/// needed mainly to not trigger inputs when interacting with scene via keyboard
 impl Plugin for DefocusPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, defocus_on_esc);

@@ -1,17 +1,20 @@
 use crate::functions::draw_line_fn;
 use bevy::{color::palettes::css::WHITE, prelude::*};
 
+/// some basic 2d functions in a 3d space
 #[allow(dead_code)]
 pub fn add_curves_3d_system(app: &mut App) {
     app.add_systems(Update, draw_square_fn);
     // app.add_systems(Update, draw_sin_as_vert_vecs);
 }
 
+/// x^2
 #[allow(dead_code)]
 fn draw_square_fn(mut gizmos: Gizmos) {
     draw_line_fn(&mut gizmos, -10, 10, 1, 0.2, |x| x * x);
 }
 
+/// sin(x)
 #[allow(dead_code)]
 fn draw_sin_fn(mut gizmos: Gizmos, _time: Res<Time>) {
     draw_line_fn(&mut gizmos, -10, 10, 1, 0.2, |x| x.sin());
@@ -20,6 +23,7 @@ fn draw_sin_fn(mut gizmos: Gizmos, _time: Res<Time>) {
     // draw_fn(gizmos, -10 + t as i32, 10 + t as i32, |x| x.sin());
 }
 
+/// like draw_sin_fn, but each point is drawn as a vector, with origin at the perpendicular axis
 #[allow(dead_code)]
 fn draw_sin_as_vert_vecs(mut gizmos: Gizmos, _time: Res<Time>) {
     let range = 20;

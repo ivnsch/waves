@@ -1,16 +1,19 @@
 use bevy::prelude::*;
 
+/// some basic 2d functions
 #[allow(dead_code)]
 pub fn add_curves_2d_system(app: &mut App) {
     // app.add_systems(Update, draw_square_fn);
     app.add_systems(Update, draw_sin_fn);
 }
 
+/// x^2
 #[allow(dead_code)]
 fn draw_square_fn(gizmos: Gizmos) {
     draw_fn(gizmos, -10, 10, |x| x * x);
 }
 
+/// sin(x)
 fn draw_sin_fn(gizmos: Gizmos, time: Res<Time>) {
     // println!("drawsign t: {}", t);
     let t = time.elapsed_seconds();
@@ -19,6 +22,7 @@ fn draw_sin_fn(gizmos: Gizmos, time: Res<Time>) {
     draw_fn(gizmos, -10 + t as i32, 10 + t as i32, |x| x.sin());
 }
 
+/// draws function as a line, i.e. draws a line between each 2 consecutive points
 fn draw_fn(mut gizmos: Gizmos, range_start: i32, range_end: i32, function: fn(f32) -> f32) {
     let scaling = 20.0;
     let x_scaling = scaling;

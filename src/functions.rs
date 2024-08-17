@@ -4,7 +4,7 @@ use bevy::{
     prelude::Gizmos,
 };
 
-/// draws function as a line
+/// draws function as a line, i.e. draws a line between each 2 consecutive points
 pub fn draw_line_fn<F>(
     gizmos: &mut Gizmos,
     range_start: i32,

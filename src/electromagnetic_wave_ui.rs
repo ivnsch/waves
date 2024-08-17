@@ -16,6 +16,7 @@ use crate::wave_ui::{
     UiInputEntities, UiInputs, UiInputsEvent, WaveLength, WaveLengthInputMarker,
 };
 
+/// adds ui to configure wave
 pub fn setup_electromagnetic_wave_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,

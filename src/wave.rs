@@ -92,6 +92,7 @@ fn draw_wave_internal(
     Ok(())
 }
 
+/// parameters the user sets via the ui
 #[derive(Debug, Clone)]
 pub struct WaveUserParameters {
     pub amplitude: Amplitude,
@@ -100,7 +101,8 @@ pub struct WaveUserParameters {
     pub phase: Phase,
 }
 
-/// to reuse wave calculation for different domains (currently electromagnetic / non electromagnetic)
+/// to share wave calculation for different domains (currently electromagnetic / non electromagnetic)
+/// lacks some domain specific units and uses just numbers instead
 /// not meant to be instantiated directly
 #[derive(Debug)]
 pub struct RawUserParameters {

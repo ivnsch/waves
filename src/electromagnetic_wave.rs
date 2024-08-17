@@ -250,6 +250,7 @@ fn draw_circular_polarity_electromagnetic_wave(
     Ok(())
 }
 
+/// parameters the user sets via the ui
 #[derive(Debug, Clone)]
 pub struct ElectromagneticWaveUserParameters {
     pub amplitude: ElectromagneticAmplitude,
@@ -269,6 +270,7 @@ impl From<ElectromagneticWaveUserParameters> for RawUserParameters {
     }
 }
 
+/// calculates wave function for a planar polarity wave
 #[allow(clippy::too_many_arguments)]
 fn calculate_u_planar(
     x: Length,
@@ -285,6 +287,7 @@ fn calculate_u_planar(
     }
 }
 
+/// calculates wave function for a circular polarity wave
 /// u(x, y) = A(cos(kx - wt)y + sin (kx - wt)z)
 /// see e.g. https://web.mit.edu/sahughes/www/8.022/lec21.pdf section 21.5
 #[allow(clippy::too_many_arguments)]
@@ -315,6 +318,7 @@ fn calculate_u_circular(
     }
 }
 
+/// 3d vector with domain specific units
 #[derive(Debug)]
 pub struct ElectricFieldVec3 {
     pub x: ElectricField,
